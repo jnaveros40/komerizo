@@ -35,14 +35,13 @@ const Home = () => {
     return null
   }
 
-  const technologies = [
-    { name: 'React 19', icon: '⚛️', color: '#61dafb' },
-    { name: 'TypeScript', icon: '🔷', color: '#3178c6' },
-    { name: 'Vite', icon: '⚡', color: '#646cff' },
-    { name: 'Tailwind CSS', icon: '💨', color: '#06b6d4' },
-    { name: 'Firebase', icon: '🔥', color: '#ffca28' },
-    { name: 'Supabase', icon: '🗄️', color: '#3ecf8e' },
-    { name: 'PWA', icon: '📱', color: '#5a0fc8' },
+  const features = [
+    { name: 'Ventas', icon: '💰', color: '#10b981' },
+    { name: 'Inventario', icon: '📦', color: '#3b82f6' },
+    { name: 'Clientes', icon: '👥', color: '#8b5cf6' },
+    { name: 'Reportes', icon: '📊', color: '#f59e0b' },
+    { name: 'Facturación', icon: '🧾', color: '#ef4444' },
+    { name: 'Analytics', icon: '📈', color: '#06b6d4' },
   ]
 
   return (
@@ -79,37 +78,37 @@ const Home = () => {
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-icon">
-          <img src="/IngNavs.png" alt="Logo" style={{ width: '10%', height: '10%', objectFit: 'contain' }} />
+          <span style={{ fontSize: '5rem' }}>🛒</span>
         </div>
         <h1 className="hero-title">
-          Esta es una plantilla
-          <span className="gradient-text"> lista para usar</span>
+          Bienvenido a
+          <span className="gradient-text"> Komerizo</span>
         </h1>
         <p className="hero-subtitle">
-          Comienza tu próximo proyecto con una base profesional que incluye
-          las mejores tecnologías del momento
+          Sistema integral de gestión comercial que potencia tu negocio
+          con herramientas modernas y análisis en tiempo real
         </p>
         
         <div className="hero-buttons">
           <button className="btn-primary">
-            Comenzar Proyecto
+            Iniciar Venta
           </button>
           <button className="btn-secondary">
-            Ver Documentación
+            Ver Dashboard
           </button>
         </div>
       </div>
 
-      {/* Technologies Grid */}
+      {/* Features Grid */}
       <div className="technologies-section">
-        <h2 className="section-title">🛠️ Tecnologías Incluidas</h2>
+        <h2 className="section-title">🚀 Módulos Principales</h2>
         <div className="tech-grid">
-          {technologies.map((tech) => (
-            <div key={tech.name} className="tech-card">
-              <div className="tech-icon" style={{ color: tech.color }}>
-                {tech.icon}
+          {features.map((feature) => (
+            <div key={feature.name} className="tech-card">
+              <div className="tech-icon" style={{ color: feature.color }}>
+                {feature.icon}
               </div>
-              <h3 className="tech-name">{tech.name}</h3>
+              <h3 className="tech-name">{feature.name}</h3>
             </div>
           ))}
         </div>
@@ -117,48 +116,48 @@ const Home = () => {
 
       {/* Features Section */}
       <div className="features-section">
-        <h2 className="section-title">✨ Características</h2>
+        <h2 className="section-title">✨ Funcionalidades</h2>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">🎨</div>
-            <h3 className="feature-title">Sistema de Colores</h3>
+            <div className="feature-icon">💳</div>
+            <h3 className="feature-title">Punto de Venta</h3>
             <p className="feature-description">
-              Paleta de colores centralizada y fácil de personalizar
+              Sistema POS rápido e intuitivo para procesar ventas
             </p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🌓</div>
-            <h3 className="feature-title">Modo Oscuro</h3>
+            <div className="feature-icon">📋</div>
+            <h3 className="feature-title">Control de Stock</h3>
             <p className="feature-description">
-              Soporte automático para tema claro y oscuro
+              Gestión completa de inventario en tiempo real
             </p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">📦</div>
-            <h3 className="feature-title">Componentes</h3>
+            <div className="feature-icon">👤</div>
+            <h3 className="feature-title">CRM Integrado</h3>
             <p className="feature-description">
-              Componentes reutilizables listos para usar
+              Administra clientes y mejora relaciones comerciales
             </p>
           </div>
           <div className="feature-card">
             <div className="feature-icon">🔒</div>
-            <h3 className="feature-title">Autenticación</h3>
+            <h3 className="feature-title">Seguridad</h3>
             <p className="feature-description">
-              Firebase y Supabase preconfigurados
+              Autenticación robusta con Supabase
             </p>
           </div>
           <div className="feature-card">
             <div className="feature-icon">⚡</div>
-            <h3 className="feature-title">Rápido</h3>
+            <h3 className="feature-title">Tiempo Real</h3>
             <p className="feature-description">
-              Optimizado con Vite para máxima velocidad
+              Sincronización instantánea de datos
             </p>
           </div>
           <div className="feature-card">
             <div className="feature-icon">📱</div>
-            <h3 className="feature-title">PWA Ready</h3>
+            <h3 className="feature-title">PWA</h3>
             <p className="feature-description">
-              Convertible a app instalable en dispositivos
+              Usa la app en cualquier dispositivo
             </p>
           </div>
         </div>
