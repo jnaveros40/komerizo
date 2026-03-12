@@ -1,10 +1,13 @@
 .login-container {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  padding-bottom: 80px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
 }
 
 .login-card {
@@ -126,6 +129,36 @@
 .toggle-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Footer en login */
+.login-container .footer-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-top: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+.login-container .footer-content {
+  padding: 1rem var(--spacing-md);
+}
+
+.login-container .brand-text h3,
+.login-container .brand-text p,
+.login-container .footer-text,
+.login-container .developer-text,
+.login-container .whatsapp-link span {
+  color: white !important;
+}
+
+.login-container .brand-logo {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 @media (max-width: 640px) {

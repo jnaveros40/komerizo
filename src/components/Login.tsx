@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import Footer from './Footer'
 import './Login.css'
 
 export default function Login() {
@@ -102,6 +103,7 @@ export default function Login() {
           </button>
         </form>
       </div>
+      <Footer />
     </div>
   )
 }

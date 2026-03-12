@@ -22,8 +22,8 @@ const Footer = () => {
             🚀
           </div>
           <div className="brand-text">
-            <h3>Tu Proyecto</h3>
-            <p>Plantilla Base</p>
+            <h3>Komerizo</h3>
+            <p>Software de Juntas de Accion Comunal</p>
           </div>
         </div>
 
@@ -93,7 +93,7 @@ const Footer = () => {
             © {new Date().getFullYear()} Todos los derechos reservados
           </p>
           <p className="footer-entity">
-            Tu Empresa
+            Komerizo
           </p>
         </div>
       </div>
