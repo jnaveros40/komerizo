@@ -1,0 +1,142 @@
+/**
+ * Variables CSS Personalizadas
+ * 
+ * Estas variables se sincronizan con src/styles/colors.ts
+ * Usa estas variables en tus archivos CSS para mantener consistencia.
+ */
+
+:root {
+  /* ========== COLORES PRIMARIOS ========== */
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-primary-dark: #4f46e5;
+  --color-primary-contrast: #ffffff;
+
+  /* ========== COLORES SECUNDARIOS ========== */
+  --color-secondary: #ec4899;
+  --color-secondary-light: #f472b6;
+  --color-secondary-dark: #db2777;
+  --color-secondary-contrast: #ffffff;
+
+  /* ========== COLORES DE ACENTO ========== */
+  --color-accent: #10b981;
+  --color-accent-light: #34d399;
+  --color-accent-dark: #059669;
+  --color-accent-contrast: #ffffff;
+
+  /* ========== COLORES NEUTRALES ========== */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+
+  /* ========== COLORES DE ESTADO ========== */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* ========== FONDOS ========== */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-dark: #18181b;
+  --bg-paper: #ffffff;
+
+  /* ========== TEXTO ========== */
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-disabled: #a1a1aa;
+  --text-inverse: #ffffff;
+
+  /* ========== BORDES ========== */
+  --border-light: #e4e4e7;
+  --border-main: #d4d4d8;
+  --border-dark: #a1a1aa;
+
+  /* ========== OVERLAYS ========== */
+  --overlay-light: rgba(0, 0, 0, 0.1);
+  --overlay-medium: rgba(0, 0, 0, 0.3);
+  --overlay-dark: rgba(0, 0, 0, 0.6);
+
+  /* ========== SOMBRAS ========== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  /* ========== RADIO DE BORDES ========== */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ========== ESPACIADO ========== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* ========== TRANSICIONES ========== */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+}
+
+/* ========== MODO OSCURO ========== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #18181b;
+    --bg-secondary: #27272a;
+    --bg-paper: #27272a;
+    
+    --text-primary: #fafafa;
+    --text-secondary: #d4d4d8;
+    --text-disabled: #71717a;
+    --text-inverse: #18181b;
+    
+    --border-light: #3f3f46;
+    --border-main: #52525b;
+    --border-dark: #71717a;
+  }
+}
+
+/* ========== CLASE PARA FORZAR MODO OSCURO ========== */
+.dark {
+  --bg-primary: #18181b;
+  --bg-secondary: #27272a;
+  --bg-paper: #27272a;
+  
+  --text-primary: #fafafa;
+  --text-secondary: #d4d4d8;
+  --text-disabled: #71717a;
+  --text-inverse: #18181b;
+  
+  --border-light: #3f3f46;
+  --border-main: #52525b;
+  --border-dark: #71717a;
+}
+
+/* ========== CLASE PARA FORZAR MODO CLARO ========== */
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-paper: #ffffff;
+  
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-disabled: #a1a1aa;
+  --text-inverse: #ffffff;
+  
+  --border-light: #e4e4e7;
+  --border-main: #d4d4d8;
+  --border-dark: #a1a1aa;
+}
