@@ -14,29 +14,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Plantilla Next.js | Ing Navs",
-  description: "Plantilla profesional con React 19, Next.js 16, TypeScript, Tailwind CSS y PWA lista para producción",
-  keywords: ["Next.js", "React", "TypeScript", "Tailwind CSS", "PWA", "Plantilla", "Template"],
-  authors: [{ name: "Ing Navs", url: "https://ingnavs.vercel.app/" }],
-  creator: "Ing Navs",
-  publisher: "Ing Navs",
-  applicationName: "Plantilla Next.js",
+  title: "Komerizo - Sistema de Gestión Comercial",
+  description: "Plataforma integral para gestión de ventas, inventario, clientes y análisis comercial en tiempo real",
+  keywords: ["Komerizo", "Gestión Comercial", "Ventas", "Inventario", "CRM", "POS", "Facturación"],
+  authors: [{ name: "Komerizo", url: "https://komerizo.com" }],
+  creator: "Komerizo",
+  publisher: "Komerizo",
+  applicationName: "Komerizo",
   generator: "Next.js",
   
   // Open Graph (Facebook, LinkedIn)
   openGraph: {
     type: "website",
     locale: "es_ES",
-    url: "https://tu-dominio.com",
-    siteName: "Plantilla Next.js",
-    title: "Plantilla Next.js | Ing Navs",
-    description: "Plantilla profesional con React 19, Next.js 16, TypeScript, Tailwind CSS y PWA lista para producción",
+    url: "https://komerizo.com",
+    siteName: "Komerizo",
+    title: "Komerizo - Sistema de Gestión Comercial",
+    description: "Plataforma integral para gestión de ventas, inventario, clientes y análisis comercial en tiempo real",
     images: [
       {
         url: "/android/play_store_512.png",
         width: 1200,
         height: 630,
-        alt: "Plantilla Next.js",
+        alt: "Komerizo",
       },
     ],
   },
@@ -44,10 +44,10 @@ export const metadata: Metadata = {
   // Twitter
   twitter: {
     card: "summary_large_image",
-    title: "Plantilla Next.js | Ing Navs",
-    description: "Plantilla profesional con React 19, Next.js 16, TypeScript, Tailwind CSS y PWA lista para producción",
+    title: "Komerizo - Sistema de Gestión Comercial",
+    description: "Plataforma integral para gestión de ventas, inventario, clientes y análisis comercial en tiempo real",
     images: ["//android/play_store_512.png"],
-    creator: "@ingnavs",
+    creator: "@komerizo",
   },
 
   // Iconos y manifest
@@ -88,7 +88,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Plantilla Next.js",
+    title: "Komerizo",
   },
 
   // Otros
@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   
-  category: "technology",
+  category: "business",
 };
 
 export default function RootLayout({
