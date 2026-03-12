@@ -1,7 +1,7 @@
 {
-  "name": "Esta es una plantilla lista para usar",
-  "short_name": "Plantilla Base",
-  "description": "Plantilla base con React, TypeScript, Firebase, Supabase, PWA y Tailwind CSS lista para usar",
+  "name": "Komerizo - Sistema de Gestión Comercial",
+  "short_name": "Komerizo",
+  "description": "Plataforma integral para gestión de ventas, inventario y clientes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

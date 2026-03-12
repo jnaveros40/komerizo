@@ -1,8 +1,40 @@
+'use client'
+
 import './Home.css'
 import Footer from '../components/Footer'
 import InstallPWA from '../components/InstallPWA'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 const Home = () => {
+  const { user, loading, signOut } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        fontSize: '1.5rem'
+      }}>
+        Cargando...
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
   const technologies = [
     { name: 'React 19', icon: '⚛️', color: '#61dafb' },
     { name: 'TypeScript', icon: '🔷', color: '#3178c6' },
@@ -15,6 +47,35 @@ const Home = () => {
 
   return (
     <div className="main-content">
+      {/* Header con botón de cerrar sesión */}
+      <div style={{ 
+        position: 'absolute', 
+        top: '1rem', 
+        right: '1rem',
+        display: 'flex',
+        gap: '1rem',
+        alignItems: 'center'
+      }}>
+        <span style={{ fontSize: '0.875rem', color: '#666' }}>
+          {user.email}
+        </span>
+        <button 
+          onClick={signOut}
+          style={{
+            padding: '0.5rem 1rem',
+            background: '#ef4444',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.5rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}
+        >
+          Cerrar Sesión
+        </button>
+      </div>
+
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-icon">
