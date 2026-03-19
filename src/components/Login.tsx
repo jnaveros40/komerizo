@@ -82,25 +82,7 @@ export default function Login() {
             </div>
           )}
 
-          <button 
-            type="submit" 
-            className="submit-button"
-            disabled={loading}
-          >
-            {loading ? 'Procesando...' : isSignUp ? 'Registrarse' : 'Entrar'}
-          </button>
-
-          <button
-            type="button"
-            className="toggle-button"
-            onClick={() => {
-              setIsSignUp(!isSignUp)
-              setMessage('')
-            }}
-            disabled={loading}
-          >
-            {isSignUp ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
-          </button>
+         
         </form>
       </div>
       <Footer />
