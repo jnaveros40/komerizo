@@ -347,6 +347,8 @@ export default function SecretarioUsuariosPage() {
           onClose={handleModalClose}
           onSave={handleUserSaved}
           isSecretario={true}
+          secretarioComuna={authUser?.comuna_id}
+          secretarioBarrio={authUser?.barrio_id}
         />
       )}
     </div>

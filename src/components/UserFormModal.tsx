@@ -41,6 +41,8 @@ type UserFormModalProps = {
   onClose: () => void
   onSave: () => void
   isSecretario?: boolean
+  secretarioComuna?: number | null
+  secretarioBarrio?: number | null
 }
 
 export default function UserFormModal({
@@ -48,6 +50,8 @@ export default function UserFormModal({
   onClose,
   onSave,
   isSecretario = false,
+  secretarioComuna,
+  secretarioBarrio,
 }: UserFormModalProps) {
   const [formData, setFormData] = useState<Usuario>({
     cc: '',
@@ -57,8 +61,9 @@ export default function UserFormModal({
     telefono: '',
     estado: 'activo',
     tipo_documento_id: 1,
-    comuna_id: null,
-    barrio_id: null,
+    // Si es Secretario creando nuevo usuario, usar su Comuna y Barrio
+    comuna_id: isSecretario && !usuario ? secretarioComuna || null : null,
+    barrio_id: isSecretario && !usuario ? secretarioBarrio || null : null,
     roles: [],
   })
 
@@ -83,8 +88,16 @@ export default function UserFormModal({
       if (usuario.comuna_id) {
         filterBarrios(usuario.comuna_id)
       }
+    } else if (isSecretario && secretarioComuna && secretarioBarrio) {
+      // Si es Secretario creando nuevo usuario, asignar su Comuna y Barrio
+      setFormData(prev => ({
+        ...prev,
+        comuna_id: secretarioComuna,
+        barrio_id: secretarioBarrio
+      }))
+      filterBarrios(secretarioComuna)
     }
-  }, [usuario])
+  }, [usuario, isSecretario, secretarioComuna, secretarioBarrio])
 
   const fetchTiposDocumento = async () => {
     try {
@@ -232,20 +245,29 @@ export default function UserFormModal({
         }
       } else {
         // Crear nuevo usuario
+        const usuarioData: any = {
+          cc: formData.cc,
+          tipo_documento_id: formData.tipo_documento_id,
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          correo_electronico: formData.correo_electronico || null,
+          telefono: formData.telefono || null,
+          estado: formData.estado,
+          contrasena: formData.contrasena,
+        }
+
+        // Si es Secretario, fuerza su Comuna y Barrio
+        if (isSecretario) {
+          usuarioData.comuna_id = secretarioComuna || formData.comuna_id || null
+          usuarioData.barrio_id = secretarioBarrio || formData.barrio_id || null
+        } else {
+          usuarioData.comuna_id = formData.comuna_id || null
+          usuarioData.barrio_id = formData.barrio_id || null
+        }
+
         const { data: nuevoUsuario, error } = await supabase
           .from('komerizo_usuarios')
-          .insert({
-            cc: formData.cc,
-            tipo_documento_id: formData.tipo_documento_id,
-            nombre: formData.nombre,
-            apellido: formData.apellido,
-            correo_electronico: formData.correo_electronico || null,
-            telefono: formData.telefono || null,
-            estado: formData.estado,
-            comuna_id: formData.comuna_id || null,
-            barrio_id: formData.barrio_id || null,
-            contrasena: formData.contrasena,
-          })
+          .insert(usuarioData)
           .select()
 
         if (error) throw error
@@ -410,49 +432,53 @@ export default function UserFormModal({
           </div>
 
           <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="comuna">Comuna</label>
-              <select
-                id="comuna"
-                value={formData.comuna_id || ''}
-                onChange={(e) =>
-                  handleComunaChange(parseInt(e.target.value) || 0)
-                }
-              >
-                <option value="">Selecciona una comuna...</option>
-                {comunas.map((comuna) => (
-                  <option key={comuna.id} value={comuna.id}>
-                    {comuna.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {(!isSecretario || usuario) && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="comuna">Comuna</label>
+                  <select
+                    id="comuna"
+                    value={formData.comuna_id || ''}
+                    onChange={(e) =>
+                      handleComunaChange(parseInt(e.target.value) || 0)
+                    }
+                  >
+                    <option value="">Selecciona una comuna...</option>
+                    {comunas.map((comuna) => (
+                      <option key={comuna.id} value={comuna.id}>
+                        {comuna.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="form-group">
-              <label htmlFor="barrio">Barrio</label>
-              <select
-                id="barrio"
-                value={formData.barrio_id || ''}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    barrio_id: parseInt(e.target.value) || null,
-                  })
-                }
-                disabled={!formData.comuna_id}
-              >
-                <option value="">
-                  {formData.comuna_id
-                    ? 'Selecciona un barrio...'
-                    : 'Primero selecciona una comuna'}
-                </option>
-                {barriosFiltrados.map((barrio) => (
-                  <option key={barrio.id} value={barrio.id}>
-                    {barrio.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div className="form-group">
+                  <label htmlFor="barrio">Barrio</label>
+                  <select
+                    id="barrio"
+                    value={formData.barrio_id || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        barrio_id: parseInt(e.target.value) || null,
+                      })
+                    }
+                    disabled={!formData.comuna_id}
+                  >
+                    <option value="">
+                      {formData.comuna_id
+                        ? 'Selecciona un barrio...'
+                        : 'Primero selecciona una comuna'}
+                    </option>
+                    {barriosFiltrados.map((barrio) => (
+                      <option key={barrio.id} value={barrio.id}>
+                        {barrio.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
           </div>
 
           {!usuario && (
