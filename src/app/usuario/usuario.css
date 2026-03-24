@@ -1,7 +1,13 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 /* Usuario Layout */
 .usuario-layout {
   display: flex;
-  height: 100vh;
+  flex: 1;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 

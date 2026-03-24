@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import AdministradorSidebar from '@/components/AdministradorSidebar'
+import Footer from '@/components/Footer'
 import './administrador.css'
 
 export default function AdministradorLayout({
@@ -46,11 +47,14 @@ export default function AdministradorLayout({
   }
 
   return (
-    <div className="administrador-layout">
-      {user && <AdministradorSidebar user={user} />}
-      <div className="administrador-content">
-        {children}
+    <div className="page-wrapper">
+      <div className="administrador-layout">
+        {user && <AdministradorSidebar user={user} />}
+        <div className="administrador-content">
+          {children}
+        </div>
       </div>
+      <Footer />
     </div>
   )
 }

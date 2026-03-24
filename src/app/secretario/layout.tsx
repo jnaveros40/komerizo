@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SecretarioSidebar from '@/components/SecretarioSidebar'
+import Footer from '@/components/Footer'
 import './secretario.css'
 
 export default function SecretarioLayout({
@@ -46,11 +47,14 @@ export default function SecretarioLayout({
   }
 
   return (
-    <div className="secretario-layout">
-      {user && <SecretarioSidebar user={user} />}
-      <main className="secretario-main">
-        <div className="secretario-content">{children}</div>
-      </main>
+    <div className="page-wrapper">
+      <div className="secretario-layout">
+        {user && <SecretarioSidebar user={user} />}
+        <main className="secretario-main">
+          <div className="secretario-content">{children}</div>
+        </main>
+      </div>
+      <Footer />
     </div>
   )
 }

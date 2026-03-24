@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import UsuarioSidebar from '@/components/UsuarioSidebar'
+import Footer from '@/components/Footer'
 import './usuario.css'
 
 export default function UsuarioLayout({
@@ -52,9 +53,12 @@ export default function UsuarioLayout({
   }
 
   return (
-    <div className="usuario-layout">
-      {user && <UsuarioSidebar user={user} />}
-      <main className="usuario-main">{children}</main>
+    <div className="page-wrapper">
+      <div className="usuario-layout">
+        {user && <UsuarioSidebar user={user} />}
+        <main className="usuario-main">{children}</main>
+      </div>
+      <Footer />
     </div>
   )
 }

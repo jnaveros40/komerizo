@@ -1,6 +1,12 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .administrador-layout {
   display: flex;
-  height: 100vh;
+  flex: 1;
   background: #0f172a;
   overflow: hidden;
 }
