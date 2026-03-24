@@ -16,6 +16,7 @@ export default function UsuarioSidebar({ user }: { user: any }) {
   const menuItems = [
     { href: '/usuario', label: '🏠 Mi Zona', icon: '🏠' },
     { href: '/usuario/informacion', label: '📋 Mi Información', icon: '📋' },
+    { href: '/usuario/perfil', label: '👤 Mi Perfil', icon: '👤' },
     { href: '/usuario/eventos', label: '📅 Eventos', icon: '📅' },
     { href: '/usuario/contactos', label: '👥 Contactos JAC', icon: '👥' },
   ]
