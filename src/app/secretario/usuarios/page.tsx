@@ -13,9 +13,12 @@ type Usuario = {
   apellido: string
   correo_electronico?: string
   telefono?: string
+  contraseña?: string
   comuna_id?: number
   barrio_id?: number
   estado: string
+  comuna_nombre?: string
+  barrio_nombre?: string
   roles?: Array<{ id: number; nombre: string }>
 }
 
@@ -29,6 +32,7 @@ export default function SecretarioUsuariosPage() {
   const [filterStatus, setFilterStatus] = useState<string>('todos')
   const [comunaName, setComunaName] = useState('')
   const [barrioName, setBarrioName] = useState('')
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     fetchComunaBarrio()
@@ -65,7 +69,7 @@ export default function SecretarioUsuariosPage() {
       // Obtener solo usuarios de la misma comuna y barrio
       const { data, error } = await supabase
         .from('komerizo_usuarios')
-        .select('*')
+        .select('*, komerizo_comunas(nombre), komerizo_barrios(nombre)')
         .eq('comuna_id', authUser.comuna_id)
         .eq('barrio_id', authUser.barrio_id)
         .order('created_at', { ascending: false })
@@ -92,7 +96,12 @@ export default function SecretarioUsuariosPage() {
             roles = rolesInfo || []
           }
 
-          return { ...usuario, roles }
+          return {
+            ...usuario,
+            roles,
+            comuna_nombre: usuario.komerizo_comunas?.nombre || '-',
+            barrio_nombre: usuario.komerizo_barrios?.nombre || '-'
+          }
         })
       )
 
@@ -155,6 +164,16 @@ export default function SecretarioUsuariosPage() {
   const handleUserSaved = () => {
     handleModalClose()
     fetchUsuarios()
+  }
+
+  const togglePasswordVisibility = (usuarioId: number) => {
+    const newVisiblePasswords = new Set(visiblePasswords)
+    if (newVisiblePasswords.has(usuarioId)) {
+      newVisiblePasswords.delete(usuarioId)
+    } else {
+      newVisiblePasswords.add(usuarioId)
+    }
+    setVisiblePasswords(newVisiblePasswords)
   }
 
   // Filtrar usuarios
@@ -238,6 +257,9 @@ export default function SecretarioUsuariosPage() {
                 <th>Apellido</th>
                 <th>Correo</th>
                 <th>Teléfono</th>
+                <th>Contraseña</th>
+                <th>Comuna</th>
+                <th>Barrio</th>
                 <th>Roles</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -253,6 +275,26 @@ export default function SecretarioUsuariosPage() {
                     {usuario.correo_electronico || '-'}
                   </td>
                   <td className="phone-cell">{usuario.telefono || '-'}</td>
+                  <td className="password-cell">
+                    <div className="password-container">
+                      <span className="password-value">
+                        {visiblePasswords.has(usuario.id)
+                          ? usuario.contraseña || '-'
+                          : usuario.contraseña ? '••••••••' : '-'}
+                      </span>
+                      {usuario.contraseña && (
+                        <button
+                          className="btn-toggle-password"
+                          onClick={() => togglePasswordVisibility(usuario.id)}
+                          title={visiblePasswords.has(usuario.id) ? 'Ocultar' : 'Mostrar'}
+                        >
+                          {visiblePasswords.has(usuario.id) ? '👁️' : '👁️‍🗨️'}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="comuna-cell">{usuario.comuna_nombre}</td>
+                  <td className="barrio-cell">{usuario.barrio_nombre}</td>
                   <td className="roles-cell">
                     {usuario.roles && usuario.roles.length > 0 ? (
                       <div className="roles-badges">

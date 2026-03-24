@@ -12,7 +12,12 @@ type Usuario = {
   apellido: string
   correo_electronico?: string
   telefono?: string
+  contraseña?: string
   estado: string
+  comuna_id?: number
+  barrio_id?: number
+  comuna_nombre?: string
+  barrio_nombre?: string
   roles?: Array<{ id: number; nombre: string }>
 }
 
@@ -23,13 +28,14 @@ export default function AdministradorUsuariosPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingUser, setEditingUser] = useState<Usuario | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('todos')
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(new Set())
 
   const fetchUsuarios = async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('komerizo_usuarios')
-        .select('*')
+        .select('*, komerizo_comunas(nombre), komerizo_barrios(nombre)')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -54,7 +60,12 @@ export default function AdministradorUsuariosPage() {
             roles = rolesInfo || []
           }
 
-          return { ...usuario, roles }
+          return {
+            ...usuario,
+            roles,
+            comuna_nombre: usuario.komerizo_comunas?.nombre || '-',
+            barrio_nombre: usuario.komerizo_barrios?.nombre || '-'
+          }
         })
       )
 
@@ -115,6 +126,16 @@ export default function AdministradorUsuariosPage() {
   const handleUserSaved = () => {
     handleModalClose()
     fetchUsuarios()
+  }
+
+  const togglePasswordVisibility = (usuarioId: number) => {
+    const newVisiblePasswords = new Set(visiblePasswords)
+    if (newVisiblePasswords.has(usuarioId)) {
+      newVisiblePasswords.delete(usuarioId)
+    } else {
+      newVisiblePasswords.add(usuarioId)
+    }
+    setVisiblePasswords(newVisiblePasswords)
   }
 
   // Filtrar usuarios
@@ -188,6 +209,9 @@ export default function AdministradorUsuariosPage() {
                 <th>Apellido</th>
                 <th>Correo</th>
                 <th>Teléfono</th>
+                <th>Contraseña</th>
+                <th>Comuna</th>
+                <th>Barrio</th>
                 <th>Roles</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -203,6 +227,26 @@ export default function AdministradorUsuariosPage() {
                     {usuario.correo_electronico || '-'}
                   </td>
                   <td className="phone-cell">{usuario.telefono || '-'}</td>
+                  <td className="password-cell">
+                    <div className="password-container">
+                      <span className="password-value">
+                        {visiblePasswords.has(usuario.id)
+                          ? usuario.contraseña || '-'
+                          : usuario.contraseña ? '••••••••' : '-'}
+                      </span>
+                      {usuario.contraseña && (
+                        <button
+                          className="btn-toggle-password"
+                          onClick={() => togglePasswordVisibility(usuario.id)}
+                          title={visiblePasswords.has(usuario.id) ? 'Ocultar' : 'Mostrar'}
+                        >
+                          {visiblePasswords.has(usuario.id) ? '👁️' : '👁️‍🗨️'}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="comuna-cell">{usuario.comuna_nombre}</td>
+                  <td className="barrio-cell">{usuario.barrio_nombre}</td>
                   <td className="roles-cell">
                     {usuario.roles && usuario.roles.length > 0 ? (
                       <div className="roles-badges">
