@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getRedirectUrlByRole } from '@/lib/roleRedirect'
 import Footer from './Footer'
 import './Login.css'
 
@@ -22,7 +23,7 @@ export default function Login() {
       // Buscar usuario por CC o correo
       let query = supabase
         .from('komerizo_usuarios')
-        .select('*, komerizo_usuario_roles(*, komerizo_roles(*))')
+        .select('*')
 
       // Determinar si es CC o correo
       if (identifier.includes('@')) {
@@ -41,6 +42,45 @@ export default function Login() {
       }
 
       const usuario = usuarios[0]
+
+      // Obtener las relaciones usuario-rol
+      const { data: usuarioRolesData, error: relationError } = await supabase
+        .from('komerizo_usuario_roles')
+        .select('rol_id')
+        .eq('usuario_id', usuario.id)
+
+      console.log('usuarioRolesData:', usuarioRolesData)
+      console.log('relationError:', relationError)
+
+      if (relationError) {
+        console.error('Error al obtener relaciones:', relationError)
+      }
+
+      // Obtener los IDs de roles
+      const roleIds = usuarioRolesData?.map((rel: any) => rel.rol_id) || []
+      console.log('roleIds extraídos:', roleIds)
+
+      // Obtener información de los roles
+      let usuarioRoles: Array<{ id: number; nombre: string }> = []
+      if (roleIds.length > 0) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('komerizo_roles')
+          .select('id, nombre')
+          .in('id', roleIds)
+
+        console.log('rolesData:', rolesData)
+        console.log('rolesError:', rolesError)
+
+        if (rolesError) {
+          console.error('Error al obtener roles:', rolesError)
+        } else {
+          usuarioRoles = rolesData || []
+        }
+      } else {
+        console.log('No hay roleIds para buscar')
+      }
+
+      console.log('Roles obtenidos de la BD:', usuarioRoles)
 
       // Verificar contraseña (nota: en producción usar hash bcrypt o similar)
       if (usuario.contrasena !== password) {
@@ -68,19 +108,24 @@ export default function Login() {
         jac: usuario.jac,
         firma: usuario.firma,
         estado: usuario.estado,
-        roles: usuario.komerizo_usuario_roles?.map((ur: any) => ({
-          id: ur.komerizo_roles.id,
-          nombre: ur.komerizo_roles.nombre,
-        })) || [],
+        roles: usuarioRoles,
       }
+
+      console.log('Usuario para storage:', userForStorage)
+      console.log('Roles del usuario:', userForStorage.roles)
 
       localStorage.setItem('komerizo_user', JSON.stringify(userForStorage))
       setMessage('¡Inicio de sesión exitoso!')
 
-      // Redirigir después de 1 segundo
+      // Determinar URL de redirección según el rol
+      const redirectUrl = getRedirectUrlByRole(userForStorage.roles)
+      console.log('URL de redirección calculada:', redirectUrl)
+
+      // Redirigir después de 500ms
       setTimeout(() => {
-        window.location.href = '/'
-      }, 1000)
+        console.log('Redirigiendo a:', redirectUrl)
+        window.location.href = redirectUrl
+      }, 500)
     } catch (error: any) {
       console.error('Error al iniciar sesión:', error)
       setError(error.message || 'Ocurrió un error al iniciar sesión')
