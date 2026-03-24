@@ -1,11 +1,26 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
+export type KomerizoUsuario = {
+  id: number
+  cc: string
+  nombre: string
+  apellido: string
+  correo_electronico: string
+  
+  telefono: string | null
+  direccion?: string
+  jac?: string
+  roles?: Array<{ id: number; nombre: string }>
+  estado: string
+  firma: boolean
+  [key: string]: any
+}
+
 type AuthContextType = {
-  user: User | null
+  user: KomerizoUsuario | null
   loading: boolean
   signOut: () => Promise<void>
 }
@@ -19,27 +34,25 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<KomerizoUsuario | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Verificar sesión actual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    // Escuchar cambios en la autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
+    // Verificar sesión guardada en localStorage
+    const storedUser = localStorage.getItem('komerizo_user')
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser))
+      } catch (error) {
+        localStorage.removeItem('komerizo_user')
+      }
+    }
+    setLoading(false)
   }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    localStorage.removeItem('komerizo_user')
+    setUser(null)
     window.location.href = '/login'
   }
 
