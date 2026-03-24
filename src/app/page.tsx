@@ -4,6 +4,7 @@ import './Home.css'
 import Footer from '../components/Footer'
 import InstallPWA from '../components/InstallPWA'
 import { useAuth } from '@/contexts/AuthContext'
+import { getRedirectUrlByRole } from '@/lib/roleRedirect'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
@@ -12,8 +13,17 @@ const Home = () => {
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
+    if (!loading) {
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      // Si el usuario tiene un rol con dashboard específico, redirigirlo
+      const redirectUrl = getRedirectUrlByRole(user.roles || [])
+      if (redirectUrl !== '/') {
+        router.push(redirectUrl)
+      }
     }
   }, [user, loading, router])
 
