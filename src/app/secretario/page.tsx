@@ -12,6 +12,14 @@ export default function SecretarioDashboard() {
     totalRoles: 0,
     totalComunas: 0,
   })
+  const [comunaInfo, setComunaInfo] = useState<{
+    id: number
+    nombre: string
+  } | null>(null)
+  const [barrioInfo, setBarrioInfo] = useState<{
+    id: number
+    nombre: string
+  } | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -41,6 +49,31 @@ export default function SecretarioDashboard() {
           totalRoles: rolesRes.count || 0,
           totalComunas: comunasRes.count || 0,
         })
+
+        // Obtener información de la comuna y barrio del usuario
+        if (user?.comuna_id) {
+          const { data: comunaData } = await supabase
+            .from('komerizo_comunas')
+            .select('id, nombre')
+            .eq('id', user.comuna_id)
+            .single()
+
+          if (comunaData) {
+            setComunaInfo(comunaData)
+          }
+        }
+
+        if (user?.barrio_id) {
+          const { data: barrioData } = await supabase
+            .from('komerizo_barrios')
+            .select('id, nombre')
+            .eq('id', user.barrio_id)
+            .single()
+
+          if (barrioData) {
+            setBarrioInfo(barrioData)
+          }
+        }
       } catch (error) {
         console.error('Error fetching stats:', error)
       } finally {
@@ -49,7 +82,7 @@ export default function SecretarioDashboard() {
     }
 
     fetchStats()
-  }, [])
+  }, [user])
 
   return (
     <div className="secretario-dashboard">
@@ -62,6 +95,31 @@ export default function SecretarioDashboard() {
         <p className="subtitle">
           Tu rol: <span className="badge">Secretario (Admin)</span>
         </p>
+      </div>
+
+      {/* Sección de Asignación de Comuna y Barrio */}
+      <div className="assignment-section">
+        <div className="assignment-card">
+          <div className="assignment-header">
+            <span className="assignment-label">Comuna Asignada</span>
+            {comunaInfo ? (
+              <span className="assignment-value">{comunaInfo.nombre}</span>
+            ) : (
+              <span className="assignment-value no-assignment">Sin asignar</span>
+            )}
+          </div>
+        </div>
+
+        <div className="assignment-card">
+          <div className="assignment-header">
+            <span className="assignment-label">Barrio Asignado</span>
+            {barrioInfo ? (
+              <span className="assignment-value">{barrioInfo.nombre}</span>
+            ) : (
+              <span className="assignment-value no-assignment">Sin asignar</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -108,10 +166,6 @@ export default function SecretarioDashboard() {
           <a href="/secretario/usuarios" className="action-btn">
             <span>👥</span>
             <span>Gestionar Usuarios</span>
-          </a>
-          <a href="/secretario/comunas" className="action-btn">
-            <span>📍</span>
-            <span>Gestionar Comunas</span>
           </a>
           <a href="/secretario/reportes" className="action-btn">
             <span>📊</span>

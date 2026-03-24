@@ -20,16 +20,6 @@ export default function SecretarioSidebar({ user }: { user: any }) {
       icon: '👥',
     },
     {
-      label: 'Comunas',
-      href: '/secretario/comunas',
-      icon: '📍',
-    },
-    {
-      label: 'Roles',
-      href: '/secretario/roles',
-      icon: '🏷️',
-    },
-    {
       label: 'Reportes',
       href: '/secretario/reportes',
       icon: '📈',
