@@ -153,6 +153,106 @@
   transform: translateY(-2px);
 }
 
+/* Role Selector */
+.role-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.role-selector-label {
+  color: #64748b;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.role-dropdown-container {
+  position: relative;
+}
+
+.role-dropdown-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  color: #60a5fa;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.role-dropdown-btn:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #60a5fa;
+}
+
+.role-icon {
+  font-size: 1rem;
+}
+
+.role-name {
+  flex: 1;
+  text-align: left;
+}
+
+.dropdown-arrow {
+  font-size: 0.625rem;
+  transition: transform 0.2s ease;
+}
+
+.role-dropdown-btn:hover .dropdown-arrow {
+  transform: translateY(2px);
+}
+
+.role-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.role-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border: none;
+  background: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.role-option:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.role-option-name {
+  flex: 1;
+}
+
+.role-option-badge {
+  color: #60a5fa;
+  font-size: 0.5rem;
+}
+
 /* Scrollbar */
 .administrador-sidebar::-webkit-scrollbar {
   width: 6px;
