@@ -2,7 +2,26 @@
 -- SQL para insertar USUARIO DE PRUEBA
 -- CC: 111111
 -- Contraseña: prueba
+-- Comunas de Ibagué (13 comunas)
 -- ============================================
+
+-- PASO 0: Insertar comunas de Ibagué
+INSERT INTO komerizo_comunas (nombre)
+VALUES
+  ('Comuna 1'),
+  ('Comuna 2'),
+  ('Comuna 3'),
+  ('Comuna 4'),
+  ('Comuna 5'),
+  ('Comuna 6'),
+  ('Comuna 7'),
+  ('Comuna 8'),
+  ('Comuna 9'),
+  ('Comuna 10'),
+  ('Comuna 11'),
+  ('Comuna 12'),
+  ('Comuna 13')
+ON CONFLICT (nombre) DO NOTHING;
 
 -- PASO 1: Insertar tipos de documento
 INSERT INTO komerizo_tipo_documento (nombre, abreviatura) 
