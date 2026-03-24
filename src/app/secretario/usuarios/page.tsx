@@ -259,7 +259,7 @@ export default function SecretarioUsuariosPage() {
                         {usuario.roles.map((role) => (
                           <span
                             key={role.id}
-                            className={`role-badge ${role.nombre.toLowerCase()}`}
+                            className={`role-badge ${role.nombre.toLowerCase().replace(/ /g, '-')}`}
                           >
                             {role.nombre}
                           </span>

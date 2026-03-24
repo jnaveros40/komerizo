@@ -198,6 +198,26 @@
   color: #d8b4fe;
 }
 
+.role-badge.coordinador {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+}
+
+.role-badge.miembro {
+  background: rgba(6, 182, 212, 0.2);
+  color: #67e8f9;
+}
+
+.role-badge.junta-directiva {
+  background: rgba(236, 72, 153, 0.2);
+  color: #f472b6;
+}
+
+.role-badge.usuario {
+  background: rgba(107, 114, 128, 0.2);
+  color: #d1d5db;
+}
+
 .no-role {
   color: #64748b;
   font-style: italic;

@@ -40,12 +40,14 @@ type UserFormModalProps = {
   usuario: Usuario | null
   onClose: () => void
   onSave: () => void
+  isSecretario?: boolean
 }
 
 export default function UserFormModal({
   usuario,
   onClose,
   onSave,
+  isSecretario = false,
 }: UserFormModalProps) {
   const [formData, setFormData] = useState<Usuario>({
     cc: '',
@@ -472,16 +474,24 @@ export default function UserFormModal({
           <div className="form-group">
             <label>Roles</label>
             <div className="roles-checkboxes">
-              {roles.map((role) => (
-                <label key={role.id} className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={selectedRoles.includes(role.id)}
-                    onChange={() => handleRoleToggle(role.id)}
-                  />
-                  <span>{role.nombre}</span>
-                </label>
-              ))}
+              {roles
+                .filter((role) => {
+                  // Si es Secretario, filtrar roles que puede asignar
+                  if (isSecretario) {
+                    return role.nombre !== 'Administrador' && role.nombre !== 'Secretario'
+                  }
+                  return true
+                })
+                .map((role) => (
+                  <label key={role.id} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={selectedRoles.includes(role.id)}
+                      onChange={() => handleRoleToggle(role.id)}
+                    />
+                    <span>{role.nombre}</span>
+                  </label>
+                ))}
             </div>
           </div>
 
