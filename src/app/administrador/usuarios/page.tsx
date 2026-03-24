@@ -1,10 +1,261 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import UserFormModal from '@/components/UserFormModal'
+import './usuarios.css'
+
+type Usuario = {
+  id: number
+  cc: string
+  nombre: string
+  apellido: string
+  correo_electronico?: string
+  telefono?: string
+  estado: string
+  roles?: Array<{ id: number; nombre: string }>
+}
+
 export default function AdministradorUsuariosPage() {
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null)
+  const [filterStatus, setFilterStatus] = useState<string>('todos')
+
+  const fetchUsuarios = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('komerizo_usuarios')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Obtener roles para cada usuario
+      const usuariosConRoles = await Promise.all(
+        (data || []).map(async (usuario) => {
+          const { data: rolesData } = await supabase
+            .from('komerizo_usuario_roles')
+            .select('rol_id')
+            .eq('usuario_id', usuario.id)
+
+          const roleIds = rolesData?.map((rel: any) => rel.rol_id) || []
+          let roles: any[] = []
+
+          if (roleIds.length > 0) {
+            const { data: rolesInfo } = await supabase
+              .from('komerizo_roles')
+              .select('id, nombre')
+              .in('id', roleIds)
+
+            roles = rolesInfo || []
+          }
+
+          return { ...usuario, roles }
+        })
+      )
+
+      setUsuarios(usuariosConRoles)
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchUsuarios()
+  }, [])
+
+  const handleCreateUser = () => {
+    setEditingUser(null)
+    setShowModal(true)
+  }
+
+  const handleEditUser = (usuario: Usuario) => {
+    setEditingUser(usuario)
+    setShowModal(true)
+  }
+
+  const handleDeleteUser = async (id: number) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      return
+    }
+
+    try {
+      // Eliminar relaciones de roles primero
+      await supabase
+        .from('komerizo_usuario_roles')
+        .delete()
+        .eq('usuario_id', id)
+
+      // Eliminar usuario
+      const { error } = await supabase
+        .from('komerizo_usuarios')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      setUsuarios(usuarios.filter((u) => u.id !== id))
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error)
+      alert('Error al eliminar usuario')
+    }
+  }
+
+  const handleModalClose = () => {
+    setShowModal(false)
+    setEditingUser(null)
+  }
+
+  const handleUserSaved = () => {
+    handleModalClose()
+    fetchUsuarios()
+  }
+
+  // Filtrar usuarios
+  const filteredUsuarios = usuarios.filter((usuario) => {
+    const matchesSearch =
+      usuario.cc.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      usuario.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (usuario.correo_electronico?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+
+    const matchesStatus =
+      filterStatus === 'todos' || usuario.estado === filterStatus
+
+    return matchesSearch && matchesStatus
+  })
+
+  if (loading) {
+    return (
+      <div className="usuarios-container">
+        <div className="loading">Cargando usuarios...</div>
+      </div>
+    )
+  }
+
   return (
-    <div className="page-container">
-      <h1>Gestión de Usuarios</h1>
-      <p>En desarrollo...</p>
+    <div className="usuarios-container">
+      <div className="usuarios-header">
+        <div>
+          <h1>Gestión de Usuarios</h1>
+          <p>Total: {filteredUsuarios.length} usuarios</p>
+        </div>
+        <button className="btn-primary" onClick={handleCreateUser}>
+          ➕ Crear Usuario
+        </button>
+      </div>
+
+      <div className="usuarios-filters">
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="Buscar por CC, nombre, apellido o correo..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="filter-status">
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="todos">Todos</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+            <option value="suspendido">Suspendido</option>
+          </select>
+        </div>
+      </div>
+
+      {filteredUsuarios.length === 0 ? (
+        <div className="no-users">
+          <p>No se encontraron usuarios</p>
+        </div>
+      ) : (
+        <div className="usuarios-table-wrapper">
+          <table className="usuarios-table">
+            <thead>
+              <tr>
+                <th>CC</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Roles</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsuarios.map((usuario) => (
+                <tr key={usuario.id}>
+                  <td className="cc-cell">{usuario.cc}</td>
+                  <td>{usuario.nombre}</td>
+                  <td>{usuario.apellido}</td>
+                  <td className="email-cell">
+                    {usuario.correo_electronico || '-'}
+                  </td>
+                  <td className="phone-cell">{usuario.telefono || '-'}</td>
+                  <td className="roles-cell">
+                    {usuario.roles && usuario.roles.length > 0 ? (
+                      <div className="roles-badges">
+                        {usuario.roles.map((role) => (
+                          <span
+                            key={role.id}
+                            className={`role-badge ${role.nombre.toLowerCase()}`}
+                          >
+                            {role.nombre}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="no-role">Sin rol</span>
+                    )}
+                  </td>
+                  <td>
+                    <span
+                      className={`status-badge ${usuario.estado}`}
+                    >
+                      {usuario.estado}
+                    </span>
+                  </td>
+                  <td className="actions-cell">
+                    <button
+                      className="btn-icon edit"
+                      onClick={() => handleEditUser(usuario)}
+                      title="Editar"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="btn-icon delete"
+                      onClick={() => handleDeleteUser(usuario.id)}
+                      title="Eliminar"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {showModal && (
+        <UserFormModal
+          usuario={editingUser}
+          onClose={handleModalClose}
+          onSave={handleUserSaved}
+        />
+      )}
     </div>
   )
 }
