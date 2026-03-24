@@ -108,6 +108,8 @@ export default function Login() {
         jac: usuario.jac,
         firma: usuario.firma,
         estado: usuario.estado,
+        comuna_id: usuario.comuna_id,
+        barrio_id: usuario.barrio_id,
         roles: usuarioRoles,
       }
 
