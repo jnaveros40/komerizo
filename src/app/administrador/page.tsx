@@ -110,11 +110,7 @@ export default function AdministradorDashboard() {
           </button>
           <button className="action-btn">
             <span className="btn-icon">🏘️</span>
-            <span className="btn-text">Gestionar Comunas</span>
-          </button>
-          <button className="action-btn">
-            <span className="btn-icon">🏢</span>
-            <span className="btn-text">Gestionar Barrios</span>
+            <span className="btn-text">Comunas y Barrios</span>
           </button>
           <button className="action-btn">
             <span className="btn-icon">⚙️</span>

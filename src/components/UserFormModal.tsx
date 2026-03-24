@@ -13,6 +13,8 @@ type Usuario = {
   telefono?: string
   estado: string
   tipo_documento_id?: number
+  comuna_id?: number | null
+  barrio_id?: number | null
   roles?: Array<{ id: number; nombre: string }>
 }
 
@@ -20,6 +22,17 @@ type TipoDocumento = {
   id: number
   nombre: string
   abreviatura: string
+}
+
+type Comuna = {
+  id: number
+  nombre: string
+}
+
+type Barrio = {
+  id: number
+  nombre: string
+  comuna_id: number
 }
 
 type UserFormModalProps = {
@@ -41,10 +54,15 @@ export default function UserFormModal({
     telefono: '',
     estado: 'activo',
     tipo_documento_id: 1,
+    comuna_id: null,
+    barrio_id: null,
     roles: [],
   })
 
   const [tiposDocumento, setTiposDocumento] = useState<TipoDocumento[]>([])
+  const [comunas, setComunas] = useState<Comuna[]>([])
+  const [barrios, setBarrios] = useState<Barrio[]>([])
+  const [barriosFiltrados, setBarriosFiltrados] = useState<Barrio[]>([])
   const [roles, setRoles] = useState<Array<{ id: number; nombre: string }>>([])
   const [selectedRoles, setSelectedRoles] = useState<number[]>([])
   const [loading, setLoading] = useState(false)
@@ -52,10 +70,16 @@ export default function UserFormModal({
 
   useEffect(() => {
     fetchTiposDocumento()
+    fetchComunas()
+    fetchBarrios()
     fetchRoles()
     if (usuario) {
       setFormData(usuario)
       setSelectedRoles(usuario.roles?.map((r) => r.id) || [])
+      // Filtrar barrios si ya tiene comuna
+      if (usuario.comuna_id) {
+        filterBarrios(usuario.comuna_id)
+      }
     }
   }, [usuario])
 
@@ -71,6 +95,44 @@ export default function UserFormModal({
     } catch (error) {
       console.error('Error al cargar tipos de documento:', error)
     }
+  }
+
+  const fetchComunas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('komerizo_comunas')
+        .select('id, nombre')
+        .order('nombre')
+
+      if (error) throw error
+      setComunas(data || [])
+    } catch (error) {
+      console.error('Error al cargar comunas:', error)
+    }
+  }
+
+  const fetchBarrios = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('komerizo_barrios')
+        .select('id, nombre, comuna_id')
+        .order('nombre')
+
+      if (error) throw error
+      setBarrios(data || [])
+    } catch (error) {
+      console.error('Error al cargar barrios:', error)
+    }
+  }
+
+  const filterBarrios = (comunaId: number) => {
+    const filtered = barrios.filter((b) => b.comuna_id === comunaId)
+    setBarriosFiltrados(filtered)
+  }
+
+  const handleComunaChange = (comunaId: number) => {
+    setFormData({ ...formData, comuna_id: comunaId, barrio_id: null })
+    filterBarrios(comunaId)
   }
 
   const fetchRoles = async () => {
@@ -131,6 +193,8 @@ export default function UserFormModal({
             telefono: formData.telefono || null,
             estado: formData.estado,
             tipo_documento_id: formData.tipo_documento_id,
+            comuna_id: formData.comuna_id || null,
+            barrio_id: formData.barrio_id || null,
             contrasena: (formData as any).contrasena || undefined,
           })
           .eq('id', usuario.id)
@@ -169,6 +233,8 @@ export default function UserFormModal({
             correo_electronico: formData.correo_electronico || null,
             telefono: formData.telefono || null,
             estado: formData.estado,
+            comuna_id: formData.comuna_id || null,
+            barrio_id: formData.barrio_id || null,
             contrasena: (formData as any).contrasena,
           })
           .select()
@@ -330,6 +396,52 @@ export default function UserFormModal({
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
                 <option value="suspendido">Suspendido</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="comuna">Comuna</label>
+              <select
+                id="comuna"
+                value={formData.comuna_id || ''}
+                onChange={(e) =>
+                  handleComunaChange(parseInt(e.target.value) || 0)
+                }
+              >
+                <option value="">Selecciona una comuna...</option>
+                {comunas.map((comuna) => (
+                  <option key={comuna.id} value={comuna.id}>
+                    {comuna.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="barrio">Barrio</label>
+              <select
+                id="barrio"
+                value={formData.barrio_id || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    barrio_id: parseInt(e.target.value) || null,
+                  })
+                }
+                disabled={!formData.comuna_id}
+              >
+                <option value="">
+                  {formData.comuna_id
+                    ? 'Selecciona un barrio...'
+                    : 'Primero selecciona una comuna'}
+                </option>
+                {barriosFiltrados.map((barrio) => (
+                  <option key={barrio.id} value={barrio.id}>
+                    {barrio.nombre}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

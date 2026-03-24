@@ -1,0 +1,279 @@
+.comunas-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.comunas-header {
+  margin-bottom: 2rem;
+}
+
+.comunas-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.5rem 0;
+}
+
+.comunas-header p {
+  color: #94a3b8;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.loading,
+.no-selection {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 1rem;
+  color: #cbd5e1;
+}
+
+/* Layout de dos paneles */
+.comunas-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  min-height: 600px;
+}
+
+/* Panel de Comunas */
+.comunas-panel {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.comunas-panel h2 {
+  color: #f1f5f9;
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.comunas-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.comuna-item {
+  padding: 1rem;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.comuna-item:hover {
+  border-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.05);
+}
+
+.comuna-item.active {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.comuna-name {
+  color: #f1f5f9;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.comuna-count {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* Panel de Barrios */
+.barrios-panel {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.barrios-header {
+  margin-bottom: 1.5rem;
+}
+
+.barrios-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.25rem 0;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.barrios-header p {
+  color: #94a3b8;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.barrios-search {
+  margin-bottom: 1.5rem;
+}
+
+.barrios-search input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 0.5rem;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.barrios-search input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.barrios-search input::placeholder {
+  color: #64748b;
+}
+
+.no-barrios {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.barrios-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.barrio-item {
+  padding: 1rem;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.barrio-item:hover {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.05);
+}
+
+.barrio-info {
+  flex: 1;
+}
+
+.barrio-info h3 {
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.barrio-comuna {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.barrio-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.5rem;
+  transition: all 0.2s ease;
+  border-radius: 0.375rem;
+}
+
+.btn-icon.edit:hover {
+  background: rgba(96, 165, 250, 0.2);
+}
+
+.btn-icon.delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Scrollbar */
+.comunas-list::-webkit-scrollbar,
+.barrios-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comunas-list::-webkit-scrollbar-track,
+.barrios-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.comunas-list::-webkit-scrollbar-thumb,
+.barrios-list::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.comunas-list::-webkit-scrollbar-thumb:hover,
+.barrios-list::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .comunas-layout {
+    grid-template-columns: 250px 1fr;
+    gap: 1.5rem;
+  }
+
+  .comunas-panel {
+    padding: 1rem;
+  }
+
+  .barrios-panel {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .comunas-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .comunas-panel {
+    max-height: 300px;
+  }
+
+  .barrios-panel {
+    min-height: 400px;
+  }
+
+  .barrios-header h2 {
+    font-size: 1.25rem;
+  }
+}
