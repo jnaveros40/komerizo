@@ -15,6 +15,7 @@ type Usuario = {
   tipo_documento_id?: number
   comuna_id?: number | null
   barrio_id?: number | null
+  contrasena?: string
   roles?: Array<{ id: number; nombre: string }>
 }
 
@@ -195,7 +196,7 @@ export default function UserFormModal({
             tipo_documento_id: formData.tipo_documento_id,
             comuna_id: formData.comuna_id || null,
             barrio_id: formData.barrio_id || null,
-            contrasena: (formData as any).contrasena || undefined,
+            contrasena: formData.contrasena || undefined,
           })
           .eq('id', usuario.id)
 
@@ -235,7 +236,7 @@ export default function UserFormModal({
             estado: formData.estado,
             comuna_id: formData.comuna_id || null,
             barrio_id: formData.barrio_id || null,
-            contrasena: (formData as any).contrasena,
+            contrasena: formData.contrasena,
           })
           .select()
 
@@ -452,12 +453,12 @@ export default function UserFormModal({
               <input
                 id="contrasena"
                 type="password"
-                value={(formData as any).contrasena || ''}
+                value={formData.contrasena || ''}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
                     contrasena: e.target.value,
-                  } as any)
+                  })
                 }
                 placeholder="Contraseña"
                 minLength={6}
