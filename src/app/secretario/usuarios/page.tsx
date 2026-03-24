@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import UserFormModal from '@/components/UserFormModal'
 import './usuarios.css'
@@ -12,24 +13,61 @@ type Usuario = {
   apellido: string
   correo_electronico?: string
   telefono?: string
+  comuna_id?: number
+  barrio_id?: number
   estado: string
   roles?: Array<{ id: number; nombre: string }>
 }
 
-export default function AdministradorUsuariosPage() {
+export default function SecretarioUsuariosPage() {
+  const { user: authUser } = useAuth()
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingUser, setEditingUser] = useState<Usuario | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('todos')
+  const [comunaName, setComunaName] = useState('')
+  const [barrioName, setBarrioName] = useState('')
+
+  useEffect(() => {
+    fetchComunaBarrio()
+  }, [authUser])
+
+  const fetchComunaBarrio = async () => {
+    if (!authUser?.comuna_id || !authUser?.barrio_id) return
+
+    try {
+      const { data: comunaData } = await supabase
+        .from('komerizo_comunas')
+        .select('nombre')
+        .eq('id', authUser.comuna_id)
+        .single()
+
+      const { data: barrioData } = await supabase
+        .from('komerizo_barrios')
+        .select('nombre')
+        .eq('id', authUser.barrio_id)
+        .single()
+
+      setComunaName(comunaData?.nombre || '')
+      setBarrioName(barrioData?.nombre || '')
+    } catch (error) {
+      console.error('Error al cargar comuna y barrio:', error)
+    }
+  }
 
   const fetchUsuarios = async () => {
     try {
       setLoading(true)
+      if (!authUser?.comuna_id) return
+
+      // Obtener solo usuarios de la misma comuna y barrio
       const { data, error } = await supabase
         .from('komerizo_usuarios')
         .select('*')
+        .eq('comuna_id', authUser.comuna_id)
+        .eq('barrio_id', authUser.barrio_id)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -67,8 +105,10 @@ export default function AdministradorUsuariosPage() {
   }
 
   useEffect(() => {
-    fetchUsuarios()
-  }, [])
+    if (authUser?.comuna_id) {
+      fetchUsuarios()
+    }
+  }, [authUser])
 
   const handleCreateUser = () => {
     setEditingUser(null)
@@ -119,6 +159,13 @@ export default function AdministradorUsuariosPage() {
 
   // Filtrar usuarios
   const filteredUsuarios = usuarios.filter((usuario) => {
+    // Excluir usuarios con roles de Administrador o Secretario
+    const hasProtectedRole = usuario.roles?.some((role) =>
+      role.nombre === 'Administrador' || role.nombre === 'Secretario'
+    )
+    
+    if (hasProtectedRole) return false
+
     const matchesSearch =
       usuario.cc.toLowerCase().includes(searchTerm.toLowerCase()) ||
       usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -143,8 +190,11 @@ export default function AdministradorUsuariosPage() {
     <div className="usuarios-container">
       <div className="usuarios-header">
         <div>
-          <h1>Gestión de Usuarios</h1>
-          <p>Total: {filteredUsuarios.length} usuarios</p>
+          <h1>👥 Gestión de Usuarios</h1>
+          <p className="header-subtitle">Total: {filteredUsuarios.length} usuarios en {barrioName}</p>
+          {comunaName && barrioName && (
+            <p className="location-info">📍 {comunaName} - {barrioName}</p>
+          )}
         </div>
         <button className="btn-primary" onClick={handleCreateUser}>
           ➕ Crear Usuario
@@ -176,7 +226,7 @@ export default function AdministradorUsuariosPage() {
 
       {filteredUsuarios.length === 0 ? (
         <div className="no-users">
-          <p>No se encontraron usuarios</p>
+          <p>📭 No se encontraron usuarios en esta zona</p>
         </div>
       ) : (
         <div className="usuarios-table-wrapper">
@@ -197,8 +247,8 @@ export default function AdministradorUsuariosPage() {
               {filteredUsuarios.map((usuario) => (
                 <tr key={usuario.id}>
                   <td className="cc-cell">{usuario.cc}</td>
-                  <td>{usuario.nombre}</td>
-                  <td>{usuario.apellido}</td>
+                  <td className="nombre-cell">{usuario.nombre}</td>
+                  <td className="apellido-cell">{usuario.apellido}</td>
                   <td className="email-cell">
                     {usuario.correo_electronico || '-'}
                   </td>
@@ -254,6 +304,7 @@ export default function AdministradorUsuariosPage() {
           usuario={editingUser}
           onClose={handleModalClose}
           onSave={handleUserSaved}
+          isSecretario={true}
         />
       )}
     </div>

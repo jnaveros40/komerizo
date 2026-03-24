@@ -23,6 +23,24 @@
   font-size: 0.9rem;
 }
 
+.header-subtitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0.25rem 0 0 0 !important;
+}
+
+.location-info {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0.5rem 0 0 0 !important;
+  padding: 0.5rem 0.75rem;
+  background: rgba(96, 165, 250, 0.1);
+  border-left: 3px solid #60a5fa;
+  border-radius: 0.25rem;
+  display: inline-block;
+  margin-top: 0.5rem !important;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   color: white;
@@ -149,6 +167,15 @@
 .cc-cell {
   font-weight: 600;
   color: #60a5fa;
+}
+
+.nombre-cell {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.apellido-cell {
+  color: #e2e8f0;
 }
 
 .email-cell,
