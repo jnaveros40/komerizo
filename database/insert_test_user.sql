@@ -561,12 +561,12 @@ INSERT INTO komerizo_usuarios (
   estado,
   firma
 ) VALUES (
-  '111111',
+  '123456',
   1,
-  'Juan',
-  'Prueba',
-  'juan.prueba@test.com',
-  'prueba',
+  'Admin',
+  'Admin',
+  'juan.admin@test.com',
+  'AdminPrueba',
   '3001234567',
   'Calle 123 #45-67',
   'JAC Barrio Test',
@@ -577,22 +577,22 @@ INSERT INTO komerizo_usuarios (
 -- PASO 3: Insertar roles (si no existen)
 INSERT INTO komerizo_roles (nombre, descripcion)
 VALUES
+  ('Secretario', 'Administrador del sistema - Gestión completa'),
   ('Junta Directiva', 'Miembro de la junta directiva'),
   ('Tesorero', 'Responsable de finanzas'),
-  ('Secretario', 'Responsable de actas'),
   ('Vocal', 'Vocal de la JAC'),
-  ('Administrador', 'Administrador del sistema'),
+  ('Coordinador', 'Coordinador de actividades'),
   ('Miembro', 'Miembro regular de la JAC')
 ON CONFLICT (nombre) DO NOTHING;
 
--- PASO 4: Asignar rol de Miembro al usuario de prueba
+-- PASO 4: Asignar rol de Secretario (Admin) al usuario de prueba
 INSERT INTO komerizo_usuario_roles (usuario_id, rol_id)
 SELECT 
-  (SELECT id FROM komerizo_usuarios WHERE cc = '111111'),
-  (SELECT id FROM komerizo_roles WHERE nombre = 'Miembro')
+  (SELECT id FROM komerizo_usuarios WHERE cc = '123456'),
+  (SELECT id FROM komerizo_roles WHERE nombre = 'Administrador')
 WHERE NOT EXISTS (
   SELECT 1 FROM komerizo_usuario_roles 
-  WHERE usuario_id = (SELECT id FROM komerizo_usuarios WHERE cc = '111111')
+  WHERE usuario_id = (SELECT id FROM komerizo_usuarios WHERE cc = '123456')
 );
 
 -- ============================================
