@@ -28,13 +28,16 @@ export default function UsuarioSidebar({ user }: { user: any }) {
   }
 
   const handleRoleChange = (roleNombre: string) => {
+    console.log('🔄 [UsuarioSidebar] handleRoleChange:', roleNombre)
     const updatedUser = { ...user, activeRole: roleNombre }
     localStorage.setItem('komerizo_user', JSON.stringify(updatedUser))
 
     const redirectUrl = getRedirectUrlByRole([{ id: 0, nombre: roleNombre }])
+    console.log('🔄 [UsuarioSidebar] Redirect URL:', redirectUrl)
     setShowRoleDropdown(false)
 
     if (redirectUrl) {
+      console.log('🔄 [UsuarioSidebar] Navigating to:', redirectUrl)
       window.location.href = redirectUrl
     }
   }

@@ -14,14 +14,18 @@ const Home = () => {
 
   useEffect(() => {
     if (!loading) {
+      console.log('📍 [page.tsx] useEffect: user loaded:', user?.email, 'roles:', user?.roles)
       if (!user) {
+        console.log('📍 [page.tsx] No user, redirecting to login')
         router.push('/login')
         return
       }
 
       // Si el usuario tiene un rol con dashboard específico, redirigirlo
       const redirectUrl = getRedirectUrlByRole(user.roles || [])
+      console.log('📍 [page.tsx] Redirect URL:', redirectUrl)
       if (redirectUrl !== '/') {
+        console.log('📍 [page.tsx] Pushing redirect to:', redirectUrl)
         router.push(redirectUrl)
       }
     }
