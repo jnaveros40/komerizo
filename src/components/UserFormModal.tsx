@@ -186,20 +186,26 @@ export default function UserFormModal({
     try {
       if (usuario) {
         // Editar usuario
+        const updateData: any = {
+          cc: formData.cc,
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          correo_electronico: formData.correo_electronico || null,
+          telefono: formData.telefono || null,
+          estado: formData.estado,
+          tipo_documento_id: formData.tipo_documento_id,
+          comuna_id: formData.comuna_id || null,
+          barrio_id: formData.barrio_id || null,
+        }
+
+        // Solo actualizar contraseña si se proporciona una nueva
+        if (formData.contrasena && formData.contrasena.trim()) {
+          updateData.contrasena = formData.contrasena
+        }
+
         const { error } = await supabase
           .from('komerizo_usuarios')
-          .update({
-            cc: formData.cc,
-            nombre: formData.nombre,
-            apellido: formData.apellido,
-            correo_electronico: formData.correo_electronico || null,
-            telefono: formData.telefono || null,
-            estado: formData.estado,
-            tipo_documento_id: formData.tipo_documento_id,
-            comuna_id: formData.comuna_id || null,
-            barrio_id: formData.barrio_id || null,
-            contrasena: formData.contrasena || undefined,
-          })
+          .update(updateData)
           .eq('id', usuario.id)
 
         if (error) throw error
@@ -468,6 +474,28 @@ export default function UserFormModal({
               {errors.contrasena && (
                 <span className="error">{errors.contrasena}</span>
               )}
+            </div>
+          )}
+
+          {usuario && (
+            <div className="form-group">
+              <label htmlFor="contrasena">Cambiar Contraseña</label>
+              <input
+                id="contrasena"
+                type="password"
+                value={formData.contrasena || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    contrasena: e.target.value,
+                  })
+                }
+                placeholder="Dejar en blanco para mantener la contraseña actual"
+                minLength={6}
+              />
+              <small style={{ color: '#64748b', marginTop: '0.25rem', display: 'block' }}>
+                Dejar en blanco mantiene la contraseña actual
+              </small>
             </div>
           )}
 
