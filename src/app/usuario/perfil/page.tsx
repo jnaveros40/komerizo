@@ -23,10 +23,10 @@ export default function UsuarioPerfil() {
   const { user } = useAuth()
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [editData, setEditData] = useState({
-    correo_electronico: '',
-    telefono: '',
+    correo_electronico: '' as string | undefined,
+    telefono: '' as string | undefined,
     contraseña: '',
-    direccion: '',
+    direccion: '' as string | undefined,
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
