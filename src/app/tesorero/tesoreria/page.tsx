@@ -49,11 +49,16 @@ export default function TesoreríaPage() {
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('📂 Cargando datos de tesorería...');
 
       const storedUser = localStorage.getItem('komerizo_user');
-      if (!storedUser) return;
+      if (!storedUser) {
+        console.error('❌ No hay usuario guardado');
+        return;
+      }
 
       const userData = JSON.parse(storedUser);
+      console.log('👤 Usuario:', userData);
       setUsuario(userData);
 
       if (userData.roles && userData.roles.length > 0) {
@@ -61,42 +66,63 @@ export default function TesoreríaPage() {
       }
 
       // Cargar movimientos
-      const { data: movimientosData } = await supabase
+      console.log('📝 Cargando movimientos...');
+      const { data: movimientosData, error: errorMovimientos } = await supabase
         .from('komerizo_tesoreria')
         .select('*')
         .order('creado_at', { ascending: false });
 
-      if (movimientosData) {
-        setMovimientos(movimientosData);
+      if (errorMovimientos) {
+        console.error('❌ Error cargando movimientos:', errorMovimientos);
+      } else {
+        console.log('✅ Movimientos cargados:', movimientosData?.length);
+        if (movimientosData) {
+          setMovimientos(movimientosData);
+        }
       }
 
       // Cargar saldo actual
-      const { data: saldoData } = await supabase
+      console.log('💰 Cargando saldo...');
+      const { data: saldoData, error: errorSaldo } = await supabase
         .from('komerizo_tesoreria_saldo')
         .select('*')
         .order('fecha_actualizacion', { ascending: false })
         .limit(1)
         .single();
 
-      if (saldoData) {
-        setSaldo(saldoData);
+      if (errorSaldo) {
+        console.error('❌ Error cargando saldo:', errorSaldo);
+      } else {
+        console.log('✅ Saldo cargado:', saldoData);
+        if (saldoData) {
+          setSaldo(saldoData);
+        }
       }
     } catch (error) {
-      console.error('Error cargando datos:', error);
+      console.error('❌ Error general en loadData:', error);
     } finally {
       setLoading(false);
+      console.log('✅ Carga completada');
     }
   };
 
   const handleAgregarMovimiento = async (e: React.FormEvent, tipo: 'ingreso' | 'gasto') => {
     e.preventDefault();
 
+    console.log('🔄 Iniciando agregar movimiento...');
+    console.log('Tipo:', tipo);
+    console.log('Usuario:', usuario);
+    console.log('Saldo:', saldo);
+    console.log('Formulario:', formMovimiento);
+
     if (!usuario || !saldo) {
+      console.error('❌ Error: Usuario o saldo no disponibles');
       alert('Error: Datos del usuario o saldo no disponibles');
       return;
     }
 
     if (formMovimiento.cantidad <= 0) {
+      console.error('❌ Cantidad inválida:', formMovimiento.cantidad);
       alert('La cantidad debe ser mayor a 0');
       return;
     }
@@ -107,12 +133,20 @@ export default function TesoreríaPage() {
         ? saldoAnterior + formMovimiento.cantidad
         : saldoAnterior - formMovimiento.cantidad;
 
+      console.log('💰 Cálculos:');
+      console.log('  Saldo Anterior:', saldoAnterior);
+      console.log('  Saldo Nuevo:', saldoNuevo);
+      console.log('  Tipo:', tipo);
+
       if (tipo === 'gasto' && saldoNuevo < 0) {
+        console.error('❌ Saldo insuficiente');
         alert('No hay suficiente saldo para este gasto');
         return;
       }
 
       // Guardar movimiento
+      console.log('📝 Insertando movimiento...');
+      console.log('  rol_id que se enviará:', userRole?.id);
       const { data: movimientoData, error: errorMovimiento } = await supabase
         .from('komerizo_tesoreria')
         .insert([
@@ -125,15 +159,21 @@ export default function TesoreríaPage() {
             justificacion: formMovimiento.justificacion,
             referencia_externa: formMovimiento.referencia_externa,
             usuario_id: usuario.id,
-            rol_id: userRole?.id,
+            rol_id: userRole?.id || null,
             estado: 'registrado',
           },
         ])
         .select();
 
-      if (errorMovimiento) throw errorMovimiento;
+      if (errorMovimiento) {
+        console.error('❌ Error insertando movimiento:', errorMovimiento);
+        throw errorMovimiento;
+      }
+
+      console.log('✅ Movimiento insertado:', movimientoData);
 
       // Actualizar saldo
+      console.log('🔄 Actualizando saldo...');
       const { error: errorSaldo } = await supabase
         .from('komerizo_tesoreria_saldo')
         .update({
@@ -144,21 +184,36 @@ export default function TesoreríaPage() {
         })
         .eq('id', saldo.id);
 
-      if (errorSaldo) throw errorSaldo;
+      if (errorSaldo) {
+        console.error('❌ Error actualizando saldo:', errorSaldo);
+        throw errorSaldo;
+      }
+
+      console.log('✅ Saldo actualizado');
 
       // Registrar en historial
       if (movimientoData && movimientoData.length > 0) {
-        await supabase.from('komerizo_tesoreria_historial').insert([
-          {
-            movimiento_id: movimientoData[0].id,
-            tipo_cambio: 'creacion',
-            valor_nuevo: movimientoData[0],
-            razon: `${tipo === 'ingreso' ? 'Ingreso' : 'Gasto'} de $${formMovimiento.cantidad}`,
-            usuario_id: usuario.id,
-          },
-        ]);
+        console.log('📋 Registrando en historial...');
+        const { error: errorHistorial } = await supabase
+          .from('komerizo_tesoreria_historial')
+          .insert([
+            {
+              movimiento_id: movimientoData[0].id,
+              tipo_cambio: 'creacion',
+              valor_nuevo: movimientoData[0],
+              razon: `${tipo === 'ingreso' ? 'Ingreso' : 'Gasto'} de $${formMovimiento.cantidad}`,
+              usuario_id: usuario.id,
+            },
+          ]);
+
+        if (errorHistorial) {
+          console.error('❌ Error registrando historial:', errorHistorial);
+        } else {
+          console.log('✅ Historial registrado');
+        }
       }
 
+      console.log('✅ Movimiento completado exitosamente');
       alert(`${tipo === 'ingreso' ? 'Ingreso' : 'Gasto'} registrado exitosamente`);
       setFormMovimiento({
         cantidad: 0,
@@ -170,7 +225,7 @@ export default function TesoreríaPage() {
       setShowFormGasto(false);
       await loadData();
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Error en handleAgregarMovimiento:', error);
       alert('Error al registrar el movimiento');
     }
   };
