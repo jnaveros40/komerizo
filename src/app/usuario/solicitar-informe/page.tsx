@@ -14,6 +14,7 @@ type Rol = {
 type Solicitud = {
   id: number
   destinatario_rol_id: number
+  destinatario_rol_nombre?: string
   mensaje_solicitud: string
   fecha_solicitud: string
   mensaje_respuesta: string
@@ -46,12 +47,19 @@ export default function SolicitarInformePage() {
       setSolicitudesLoading(true)
       const { data, error } = await supabase
         .from('komerizo_solicitud_informes')
-        .select('*')
+        .select('*, komerizo_roles(nombre)')
         .eq('usuario_id', user.id)
         .order('fecha_solicitud', { ascending: false })
 
       if (error) throw error
-      setSolicitudes(data || [])
+      
+      // Mapear los datos para incluir el nombre del rol
+      const solicitudesConRol = (data || []).map((sol: any) => ({
+        ...sol,
+        destinatario_rol_nombre: sol.komerizo_roles?.nombre || `Rol ${sol.destinatario_rol_id}`,
+      }))
+      
+      setSolicitudes(solicitudesConRol)
     } catch (error) {
       console.error('Error al cargar solicitudes:', error)
     } finally {
@@ -244,7 +252,7 @@ export default function SolicitarInformePage() {
                   <div className="solicitud-header">
                     <div className="solicitud-row">
                       <span className="label">Solicitado a:</span>
-                      <span className="value">Rol ID: {solicitud.destinatario_rol_id}</span>
+                      <span className="value">{solicitud.destinatario_rol_nombre || `Rol ${solicitud.destinatario_rol_id}`}</span>
                     </div>
                     <span
                       className={`status-badge ${
