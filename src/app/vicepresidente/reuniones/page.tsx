@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import '@/components/reuniones.css';
 
@@ -38,26 +39,61 @@ interface Usuario {
   rol_id: number;
 }
 
-export default function VicepresidenteReuniones() {
+// Mapeador de pathname a rol_id específico
+const getRoleIdFromPathname = (pathname: string): number | null => {
+  const pathMap: { [key: string]: number } = {
+    'presidente': 17,
+    'vicepresidente': 18,
+    'tesorero': 2,
+    'secretario': 3,
+    'fiscal': 19,
+  };
+
+  for (const [path, roleId] of Object.entries(pathMap)) {
+    if (pathname.includes(`/${path}/`)) {
+      return roleId;
+    }
+  }
+  return null;
+};
+
+export default function PresidenteReuniones() {
+  const pathname = usePathname();
+  const currentRoleId = getRoleIdFromPathname(pathname);
+
   const [reuniones, setReuniones] = useState<Reunion[]>([]);
   const [filteredReuniones, setFilteredReuniones] = useState<Reunion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userRoleId, setUserRoleId] = useState<number | null>(null);
-  const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  const [userRoleIds, setUserRoleIds] = useState<number[]>([]);
   const [actualizarDatos, setActualizarDatos] = useState(false);
 
   const [filtros, setFiltros] = useState({
     estado: 'todos',
     tipo: 'todos',
-    mi_confirmacion: 'todos',
+    fecha: '',
+  });
+
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    titulo: '',
+    descripcion: '',
+    tipo_reunion: 'Reunion',
+    lugar: '',
+    fecha_reunion: '',
+    hora_inicio: '',
+    hora_fin: '',
+    es_obligatoria: false,
+    requiere_confirmacion: true,
+    roles_invitados: [] as number[],
   });
 
   const [rolesDisponibles, setRolesDisponibles] = useState<{ id: number; nombre: string }[]>([]);
-  const [confirmacionesMap, setConfirmacionesMap] = useState<Map<number, Confirmacion>>(new Map());
+  const [confirmacionesMap, setConfirmacionesMap] = useState<Map<number, Confirmacion[]>>(new Map());
+  const [usuarioData, setUsuarioData] = useState<any>(null);
 
-  // Cargar datos del usuario y reuniones invitadas
+  // Obtener roles del usuario y cargar reuniones
   useEffect(() => {
-    const loadUserData = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
 
@@ -69,9 +105,37 @@ export default function VicepresidenteReuniones() {
         }
 
         const user = JSON.parse(storedUser);
-        setUsuarioId(user.id);
 
-        // Obtener todos los roles disponibles
+        // Cargar datos completos del usuario (incluyendo comuna y barrio)
+        const { data: userData, error: userError } = await supabase
+          .from('komerizo_usuarios')
+          .select('id, nombre, cc, comuna_id, barrio_id')
+          .eq('id', user.id)
+          .single();
+
+        if (userError) {
+          console.error('Error cargando datos del usuario:', userError);
+        } else if (userData) {
+          console.log('✅ Datos del usuario cargados:', userData);
+          setUsuarioData(userData);
+        }
+
+        // Obtener TODOS los roles del usuario desde komerizo_usuario_roles
+        const { data: userRolesData, error: userRolesError } = await supabase
+          .from('komerizo_usuario_roles')
+          .select('rol_id')
+          .eq('usuario_id', user.id);
+
+        if (userRolesError) {
+          console.error('Error cargando roles del usuario:', userRolesError);
+          return;
+        }
+
+        const roleIds = userRolesData?.map((r) => r.rol_id) || [];
+        setUserRoleIds(roleIds);
+        console.log('👤 Roles del usuario:', roleIds);
+
+        // Obtener todos los roles disponibles (para mostrar nombres)
         const { data: allRoles, error: allRolesError } = await supabase
           .from('komerizo_roles')
           .select('id, nombre')
@@ -84,19 +148,8 @@ export default function VicepresidenteReuniones() {
 
         setRolesDisponibles(allRoles || []);
 
-        // Obtener el ID del rol "Vicepresidente"
-        const vicepresidenteRole = allRoles?.find((r) => r.nombre === 'Vicepresidente');
-        const rolId = vicepresidenteRole?.id;
-
-        if (!rolId) {
-          console.error('No se encontró el rol de Vicepresidente');
-          return;
-        }
-
-        setUserRoleId(rolId);
-
-        // Cargar todas las reuniones (donde su rol fue invitado)
-        await loadReunionesInvitadas(rolId, user.id);
+        // Cargar reuniones
+        await loadReuniones(roleIds);
       } catch (error) {
         console.error('Error cargando datos:', error);
       } finally {
@@ -104,11 +157,11 @@ export default function VicepresidenteReuniones() {
       }
     };
 
-    loadUserData();
+    loadData();
   }, [actualizarDatos]);
 
-  // Cargar reuniones donde el usuario fue invitado
-  const loadReunionesInvitadas = async (userRoleId: number, usuarioId: number) => {
+  // Cargar reuniones
+  const loadReuniones = async (roleIds: number[]) => {
     try {
       // Cargar TODAS las reuniones
       const { data, error } = await supabase
@@ -118,38 +171,26 @@ export default function VicepresidenteReuniones() {
 
       if (error) throw error;
 
-      console.log(`💾 Todas las reuniones cargadas:`, data?.length);
-      data?.forEach((r) => {
-        console.log(`  - Reunión "${r.titulo}": roles_invitados = ${JSON.stringify(r.roles_invitados)}`);
-      });
+      // Mostrar TODAS las reuniones (no filtrar)
+      setReuniones(data || []);
 
-      // Filtrar solo las donde el rol del usuario está en roles_invitados
-      const reunionesInvitadas = data?.filter((r) => r.roles_invitados.includes(userRoleId)) || [];
-      console.log(`📅 Reuniones para rol ${userRoleId}:`, reunionesInvitadas.length);
-
-      setReuniones(reunionesInvitadas);
-
-      // Cargar confirmaciones del usuario
-      if (reunionesInvitadas.length > 0) {
-        const reunionIds = reunionesInvitadas.map((r) => r.id);
+      // Cargar confirmaciones de TODAS
+      if (data && data.length > 0) {
+        const reunionIds = data.map((r) => r.id);
 
         for (const reunionId of reunionIds) {
           const { data: confirmaciones, error: confError } = await supabase
             .from('komerizo_reuniones_confirmaciones')
             .select('*')
-            .eq('reunion_id', reunionId)
-            .eq('usuario_id', usuarioId)
-            .single();
+            .eq('reunion_id', reunionId);
 
-          if (confError && confError.code !== 'PGRST116') {
-            console.error('Error cargando confirmación:', confError);
-          } else if (confirmaciones) {
-            setConfirmacionesMap((prev) => new Map(prev).set(reunionId, confirmaciones));
-          }
+          if (confError) throw confError;
+
+          setConfirmacionesMap((prev) => new Map(prev).set(reunionId, confirmaciones || []));
         }
       }
     } catch (error) {
-      console.error('Error cargando reuniones invitadas:', error);
+      console.error('Error cargando reuniones:', error);
     }
   };
 
@@ -165,59 +206,115 @@ export default function VicepresidenteReuniones() {
       filtered = filtered.filter((r) => r.tipo_reunion === filtros.tipo);
     }
 
-    if (filtros.mi_confirmacion !== 'todos') {
-      filtered = filtered.filter((r) => {
-        const confirmacion = confirmacionesMap.get(r.id);
-        if (filtros.mi_confirmacion === 'sin_responder') {
-          return !confirmacion;
-        }
-        return confirmacion?.estado_confirmacion === filtros.mi_confirmacion;
-      });
+    if (filtros.fecha) {
+      filtered = filtered.filter((r) => r.fecha_reunion === filtros.fecha);
     }
 
     setFilteredReuniones(filtered);
-  }, [reuniones, filtros, confirmacionesMap]);
+  }, [reuniones, filtros]);
 
-  // Confirmar asistencia
-  const handleConfirmarAsistencia = async (reunionId: number, estado: 'confirmado' | 'rechazado') => {
+  // Crear nueva reunión
+  const handleCrearReunion = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     try {
-      if (!usuarioId) return;
-
-      // Verificar si ya existe confirmación
-      const existente = confirmacionesMap.get(reunionId);
-
-      if (existente) {
-        // Actualizar
-        const { error } = await supabase
-          .from('komerizo_reuniones_confirmaciones')
-          .update({ estado_confirmacion: estado })
-          .eq('id', existente.id);
-
-        if (error) throw error;
-      } else {
-        // Crear nueva
-        const { error } = await supabase.from('komerizo_reuniones_confirmaciones').insert([
-          {
-            reunion_id: reunionId,
-            usuario_id: usuarioId,
-            estado_confirmacion: estado,
-          },
-        ]);
-
-        if (error) throw error;
+      const storedUser = localStorage.getItem('komerizo_user');
+      if (!storedUser) {
+        alert('No hay usuario en sesión');
+        return;
       }
+
+      const user = JSON.parse(storedUser);
+      const usuarioId = user.id;
+
+      // Obtener comuna y barrio del usuario
+      const comunaId = usuarioData?.comuna_id || null;
+      const barrioId = usuarioData?.barrio_id || null;
+
+      console.log('📝 Creando reunión con - Comuna:', comunaId, 'Barrio:', barrioId, 'usuarioData:', usuarioData);
+
+      const reunionData = {
+        creador_id: usuarioId,
+        titulo: formData.titulo,
+        descripcion: formData.descripcion,
+        tipo_reunion: formData.tipo_reunion,
+        lugar: formData.lugar,
+        fecha_reunion: formData.fecha_reunion,
+        hora_inicio: formData.hora_inicio,
+        hora_fin: formData.hora_fin,
+        es_obligatoria: formData.es_obligatoria,
+        requiere_confirmacion: formData.requiere_confirmacion,
+        roles_invitados: formData.roles_invitados,
+        comuna_id: comunaId,
+        barrio_id: barrioId,
+        estado: 'pendiente',
+      };
+
+      console.log('🔍 Datos a insertar:', JSON.stringify(reunionData, null, 2));
+
+      const { data: insertData, error } = await supabase.from('komerizo_reuniones').insert([reunionData]);
+
+      if (error) {
+        console.error('❌ Error insertando reunión:', error);
+        throw error;
+      }
+
+      console.log('✅ Reunión insertada:', insertData);
+
+      alert('Reunión creada exitosamente');
+      setShowForm(false);
+      setFormData({
+        titulo: '',
+        descripcion: '',
+        tipo_reunion: 'Reunion',
+        lugar: '',
+        fecha_reunion: '',
+        hora_inicio: '',
+        hora_fin: '',
+        es_obligatoria: false,
+        requiere_confirmacion: true,
+        roles_invitados: [],
+      });
+      setActualizarDatos(!actualizarDatos);
+    } catch (error) {
+      console.error('Error creando reunión:', error);
+      alert('Error al crear la reunión');
+    }
+  };
+
+  // Cambiar estado de reunión
+  const handleCambiarEstado = async (reunionId: number, nuevoEstado: string) => {
+    try {
+      const { error } = await supabase
+        .from('komerizo_reuniones')
+        .update({ estado: nuevoEstado })
+        .eq('id', reunionId);
+
+      if (error) throw error;
 
       setActualizarDatos(!actualizarDatos);
     } catch (error) {
-      console.error('Error confirmando asistencia:', error);
-      alert('Error al actualizar tu confirmación');
+      console.error('Error actualizando reunión:', error);
     }
+  };
+
+  // Cancelar reunión
+  const handleCancelarReunion = async (reunionId: number) => {
+    if (!confirm('¿Está seguro que desea cancelar esta reunión?')) return;
+
+    await handleCambiarEstado(reunionId, 'cancelada');
   };
 
   // Renderizar card de reunión
   const renderReunionCard = (reunion: Reunion) => {
-    const miConfirmacion = confirmacionesMap.get(reunion.id);
-    const estaInvitado = reunion.roles_invitados.includes(userRoleId || -1);
+    const confirmaciones = confirmacionesMap.get(reunion.id) || [];
+    const confirmados = confirmaciones.filter((c) => c.estado_confirmacion === 'confirmado').length;
+    const rechazados = confirmaciones.filter((c) => c.estado_confirmacion === 'rechazado').length;
+    const sinResponder = confirmaciones.filter((c) => c.estado_confirmacion === 'sin_responder').length;
+    
+    // Verificar si el rol ESPECÍFICO de esta página fue invitado
+    const fueInvitado = currentRoleId ? reunion.roles_invitados.includes(currentRoleId) : false;
+    console.log(`🔍 Reunión "${reunion.titulo}": currentRoleId=${currentRoleId}, roles_invitados=${JSON.stringify(reunion.roles_invitados)}, fueInvitado=${fueInvitado}`);
 
     return (
       <div key={reunion.id} className="reunion-card">
@@ -255,43 +352,59 @@ export default function VicepresidenteReuniones() {
 
         <div className="reunion-descripcion">{reunion.descripcion}</div>
 
-        {/* Mostrar estado de mi confirmación */}
-        {miConfirmacion && (
-          <div className="reunion-mi-confirmacion">
-            <span className={`confirmacion-badge ${miConfirmacion.estado_confirmacion}`}>
-              Tu respuesta: {miConfirmacion.estado_confirmacion === 'confirmado' ? '✅ Confirmado' : '❌ Rechazado'}
-            </span>
+        {reunion.requiere_confirmacion && confirmaciones.length > 0 && (
+          <div className="reunion-confirmaciones">
+            <div className="confirmaciones-label">Confirmaciones</div>
+            <div className="reunion-meta">
+              <div className="meta-item">
+                ✅ Confirmados: <strong>{confirmados}</strong>
+              </div>
+              <div className="meta-item">
+                ❌ Rechazados: <strong>{rechazados}</strong>
+              </div>
+              <div className="meta-item">
+                ⏳ Sin responder: <strong>{sinResponder}</strong>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Botones de confirmar/rechazar SOLO si fue invitado y no ha respondido o puede cambiar respuesta */}
-        {estaInvitado && reunion.requiere_confirmacion && (
+        {reunion.roles_invitados.length > 0 && (
+          <div className="reunion-roles">
+            <div className="roles-label">Roles Invitados</div>
+            <div className="roles-list">
+              {reunion.roles_invitados.map((roleId) => {
+                const role = rolesDisponibles.find((r) => r.id === roleId);
+                return (
+                  <span key={roleId} className="role-badge">
+                    {role?.nombre || `Rol ${roleId}`}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* SOLO mostrar botones si fue invitado alguno de sus roles */}
+        {fueInvitado && reunion.estado === 'pendiente' && (
           <div className="reunion-acciones">
             <button
               className="btn-reunion btn-editar"
-              onClick={() => handleConfirmarAsistencia(reunion.id, 'confirmado')}
-              disabled={miConfirmacion?.estado_confirmacion === 'confirmado'}
-              style={{
-                opacity: miConfirmacion?.estado_confirmacion === 'confirmado' ? 0.6 : 1,
-              }}
+              onClick={() => handleCambiarEstado(reunion.id, 'confirmada')}
             >
-              ✅ Confirmar
+              Confirmar
             </button>
             <button
               className="btn-reunion btn-cancelar-reunion"
-              onClick={() => handleConfirmarAsistencia(reunion.id, 'rechazado')}
-              disabled={miConfirmacion?.estado_confirmacion === 'rechazado'}
-              style={{
-                opacity: miConfirmacion?.estado_confirmacion === 'rechazado' ? 0.6 : 1,
-              }}
+              onClick={() => handleCancelarReunion(reunion.id)}
             >
-              ❌ Rechazar
+              Cancelar
             </button>
           </div>
         )}
 
-        {/* Si no fue invitado, mostrar mensaje */}
-        {!estaInvitado && (
+        {/* Mostrar mensaje si NO fue invitado */}
+        {!fueInvitado && (
           <div style={{ color: '#a1aec6', fontSize: '0.9rem', fontStyle: 'italic', marginTop: '1rem' }}>
             No fuiste invitado a esta reunión
           </div>
@@ -315,8 +428,11 @@ export default function VicepresidenteReuniones() {
       <div className="reuniones-header">
         <div>
           <h1>Reuniones</h1>
-          <p className="header-subtitle">Confirmación de asistencia a reuniones</p>
+          <p className="header-subtitle">Gestiona las reuniones, juntas y eventos</p>
         </div>
+        <button className="btn-nueva-reunion" onClick={() => setShowForm(true)}>
+          ➕ Nueva Reunión
+        </button>
       </div>
 
       {/* Filtros */}
@@ -353,22 +469,18 @@ export default function VicepresidenteReuniones() {
         </div>
 
         <div className="filtro-group">
-          <label className="filtro-label">Mi Confirmación</label>
-          <select
-            className="filtro-select"
-            value={filtros.mi_confirmacion}
-            onChange={(e) => setFiltros({ ...filtros, mi_confirmacion: e.target.value })}
-          >
-            <option value="todos">Todas</option>
-            <option value="confirmado">Confirmadas</option>
-            <option value="rechazado">Rechazadas</option>
-            <option value="sin_responder">Sin responder</option>
-          </select>
+          <label className="filtro-label">Fecha</label>
+          <input
+            type="date"
+            className="filtro-input"
+            value={filtros.fecha}
+            onChange={(e) => setFiltros({ ...filtros, fecha: e.target.value })}
+          />
         </div>
 
         <button
           className="filtro-btn-reset"
-          onClick={() => setFiltros({ estado: 'todos', tipo: 'todos', mi_confirmacion: 'todos' })}
+          onClick={() => setFiltros({ estado: 'todos', tipo: 'todos', fecha: '' })}
         >
           Limpiar filtros
         </button>
@@ -381,6 +493,178 @@ export default function VicepresidenteReuniones() {
         </div>
       ) : (
         <div className="reuniones-list">{filteredReuniones.map(renderReunionCard)}</div>
+      )}
+
+      {/* Modal para nueva reunión */}
+      {showForm && (
+        <div className="modal-overlay active">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Nueva Reunión</h2>
+              <button className="btn-cerrar" onClick={() => setShowForm(false)}>
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCrearReunion}>
+              <div className="form-group">
+                <label className="form-label">Título *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.titulo}
+                  onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Descripción *</label>
+                <textarea
+                  className="form-textarea"
+                  value={formData.descripcion}
+                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Tipo de Reunión *</label>
+                <select
+                  className="form-select"
+                  value={formData.tipo_reunion}
+                  onChange={(e) => setFormData({ ...formData, tipo_reunion: e.target.value })}
+                >
+                  <option>Reunion</option>
+                  <option>Junta</option>
+                  <option>Elecciones</option>
+                  <option>Capacitacion</option>
+                  <option>Evento</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Lugar</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.lugar}
+                  onChange={(e) => setFormData({ ...formData, lugar: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Fecha de Reunión *</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.fecha_reunion}
+                  onChange={(e) => setFormData({ ...formData, fecha_reunion: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Hora Inicio</label>
+                <input
+                  type="time"
+                  className="form-input"
+                  value={formData.hora_inicio}
+                  onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Hora Fin</label>
+                <input
+                  type="time"
+                  className="form-input"
+                  value={formData.hora_fin}
+                  onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Roles a Invitar *</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', padding: '0.5rem', background: '#0f172a', borderRadius: '6px', border: '1px solid #475569' }}>
+                  {rolesDisponibles.length === 0 ? (
+                    <p style={{ color: '#a1aec6', margin: 0 }}>Cargando roles...</p>
+                  ) : (
+                    rolesDisponibles.map((role) => (
+                      <label key={role.id} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', cursor: 'pointer', color: '#cbd5e1' }}>
+                        <input
+                          type="checkbox"
+                          value={role.id}
+                          checked={formData.roles_invitados.includes(role.id)}
+                          onChange={(e) => {
+                            const roleId = parseInt(e.target.value);
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                roles_invitados: [...formData.roles_invitados, roleId],
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                roles_invitados: formData.roles_invitados.filter((id) => id !== roleId),
+                              });
+                            }
+                          }}
+                          style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                        />
+                        <span>{role.nombre}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {formData.roles_invitados.length === 0 && (
+                  <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: '0.5rem 0 0 0' }}>Selecciona al menos un rol</p>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.es_obligatoria}
+                    onChange={(e) => setFormData({ ...formData, es_obligatoria: e.target.checked })}
+                  />
+                  <span className="form-label" style={{ margin: 0 }}>
+                    Es obligatoria
+                  </span>
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.requiere_confirmacion}
+                    onChange={(e) =>
+                      setFormData({ ...formData, requiere_confirmacion: e.target.checked })
+                    }
+                  />
+                  <span className="form-label" style={{ margin: 0 }}>
+                    Requiere confirmación
+                  </span>
+                </label>
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="btn-guardar">
+                  Crear Reunión
+                </button>
+                <button
+                  type="button"
+                  className="btn-cancelar-form"
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
