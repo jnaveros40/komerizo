@@ -2,7 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import '@/components/reuniones.css';
+
+// Tipado para jsPDF autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: any;
+    lastAutoTable: any;
+  }
+}
 
 interface InventarioItem {
   id: number;
@@ -270,6 +281,122 @@ export default function TesoreroInventarioPage() {
     } catch (error) {
       console.error('Error generando reporte:', error);
       alert('Error al generar el reporte');
+    }
+  };
+
+  // Descargar reporte como PDF
+  const handleDescargarPDF = async (reporte: Reporte) => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let yPosition = 20;
+
+      // Color principal
+      const primaryColor = [108, 92, 231]; // #6c5ce7
+
+      // Título
+      doc.setFontSize(20);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text(`Reporte de Inventario ${reporte.tipo_reporte.toUpperCase()}`, pageWidth / 2, yPosition, {
+        align: 'center',
+      });
+
+      yPosition += 15;
+
+      // Información general
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Período: ${new Date(reporte.fecha_inicio).toLocaleDateString('es-ES')} - ${new Date(reporte.fecha_fin).toLocaleDateString('es-ES')}`, 20, yPosition);
+      yPosition += 8;
+
+      doc.text(`Fecha de Generación: ${new Date(reporte.fecha_generacion).toLocaleString('es-ES')}`, 20, yPosition);
+      yPosition += 8;
+
+      doc.text(`Estado: ${reporte.estado}`, 20, yPosition);
+      yPosition += 15;
+
+      // Resumen de valores
+      doc.setFontSize(12);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text('Resumen Financiero', 20, yPosition);
+
+      yPosition += 8;
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+
+      doc.text(
+        `Valor Total del Inventario: $${reporte.valor_final?.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        20,
+        yPosition
+      );
+      yPosition += 8;
+
+      doc.text(`Total de Cambios Registrados: ${reporte.total_cambios}`, 20, yPosition);
+      yPosition += 15;
+
+      // Detalle de cambios
+      doc.setFontSize(12);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text('Cambios Registrados', 20, yPosition);
+
+      yPosition += 8;
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+
+      if (reporte.detalles) {
+        try {
+          const detalles = JSON.parse(reporte.detalles);
+          const cambios = detalles.cambios || [];
+
+          if (cambios.length > 0) {
+            // Crear tabla de cambios
+            const tableData = cambios.slice(0, 20).map((cambio: any) => [
+              new Date(cambio.fecha_cambio).toLocaleDateString('es-ES'),
+              cambio.tipo_cambio,
+              cambio.justificacion?.substring(0, 30) + '...',
+            ]);
+
+            doc.autoTable({
+              startY: yPosition,
+              head: [['Fecha', 'Tipo de Cambio', 'Justificación']],
+              body: tableData,
+              theme: 'grid',
+              headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
+              margin: { left: 20, right: 20 },
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 10;
+          } else {
+            doc.text('No hay cambios registrados en este período', 20, yPosition);
+          }
+        } catch (e) {
+          doc.text('No hay detalles disponibles', 20, yPosition);
+        }
+      }
+
+      // Pie de página
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `Página ${i} de ${totalPages}`,
+          pageWidth / 2,
+          pageHeight - 10,
+          { align: 'center' }
+        );
+      }
+
+      // Descargar
+      const nombreArchivo = `Reporte_Inventario_${reporte.tipo_reporte}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(nombreArchivo);
+
+      alert('PDF descargado exitosamente');
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Error al descargar el PDF');
     }
   };
 
@@ -855,6 +982,15 @@ export default function TesoreroInventarioPage() {
 
                   <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#a1aec6' }}>
                     Generado: {new Date(reporte.fecha_generacion).toLocaleString('es-ES')}
+                  </div>
+
+                  <div className="reunion-acciones">
+                    <button
+                      className="btn-reunion btn-editar"
+                      onClick={() => handleDescargarPDF(reporte)}
+                    >
+                      📥 Descargar PDF
+                    </button>
                   </div>
                 </div>
               ))
