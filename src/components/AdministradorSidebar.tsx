@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { getRedirectUrlByRole } from '@/lib/roleRedirect'
+import { supabase } from '@/lib/supabase'
 import './AdministradorSidebar.css'
 
 export default function AdministradorSidebar({ user }: { user: any }) {
@@ -12,6 +13,7 @@ export default function AdministradorSidebar({ user }: { user: any }) {
   const router = useRouter()
   const { signOut } = useAuth()
   const [showRoleDropdown, setShowRoleDropdown] = useState(false)
+  const [userRoles, setUserRoles] = useState<Array<{ id: number; nombre: string }>>(user?.roles || [])
 
   const menuItems = [
     { href: '/administrador', label: '📊 Dashboard', icon: '📊' },
@@ -19,6 +21,42 @@ export default function AdministradorSidebar({ user }: { user: any }) {
     { href: '/administrador/comunas', label: '🏘️ Comunas y Barrios', icon: '🏘️' },
     { href: '/administrador/configuracion', label: '⚙️ Configuración', icon: '⚙️' },
   ]
+
+  useEffect(() => {
+    // Cargar los roles actualizados de la BD cuando se abre el dropdown
+    if (showRoleDropdown && user?.id) {
+      loadUserRoles()
+    }
+  }, [showRoleDropdown])
+
+  const loadUserRoles = async () => {
+    try {
+      // Obtener roles del usuario desde BD
+      const { data: usuarioRolesData } = await supabase
+        .from('komerizo_usuario_roles')
+        .select('rol_id')
+        .eq('usuario_id', user.id)
+
+      const roleIds = usuarioRolesData?.map((rel: any) => rel.rol_id) || []
+
+      if (roleIds.length > 0) {
+        const { data: rolesData } = await supabase
+          .from('komerizo_roles')
+          .select('id, nombre')
+          .in('id', roleIds)
+          .order('nombre', { ascending: true })
+
+        if (rolesData) {
+          setUserRoles(rolesData)
+          // Actualizar en localStorage
+          const updatedUser = { ...user, roles: rolesData }
+          localStorage.setItem('komerizo_user', JSON.stringify(updatedUser))
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar roles:', error)
+    }
+  }
 
   const isActive = (href: string) => {
     if (href === '/administrador') {
@@ -66,7 +104,7 @@ export default function AdministradorSidebar({ user }: { user: any }) {
 
       <div className="sidebar-footer">
         {/* Selector de Roles */}
-        {user?.roles && user.roles.length > 1 && (
+        {userRoles && userRoles.length > 1 && (
           <div className="role-selector">
             <div className="role-selector-label">Rol Actual</div>
             <div className="role-dropdown-container">
@@ -80,7 +118,7 @@ export default function AdministradorSidebar({ user }: { user: any }) {
               </button>
               {showRoleDropdown && (
                 <div className="role-dropdown-menu">
-                  {user.roles.map((role: any) => (
+                  {userRoles.map((role: any) => (
                     <button
                       key={role.id}
                       className="role-option"

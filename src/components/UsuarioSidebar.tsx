@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { getRedirectUrlByRole } from '@/lib/roleRedirect'
+import { supabase } from '@/lib/supabase'
 import './UsuarioSidebar.css'
 
 export default function UsuarioSidebar({ user }: { user: any }) {
@@ -12,6 +13,7 @@ export default function UsuarioSidebar({ user }: { user: any }) {
   const router = useRouter()
   const { signOut } = useAuth()
   const [showRoleDropdown, setShowRoleDropdown] = useState(false)
+  const [userRoles, setUserRoles] = useState<Array<{ id: number; nombre: string }>>(user?.roles || [])
 
   const menuItems = [
     { href: '/usuario', label: 'Mi Zona', icon: '🏠' },

@@ -12,8 +12,8 @@ export function getRedirectUrlByRole(roles: Array<{ id: number; nombre: string }
   const roleMap: Record<string, string> = {
     'Administrador': '/administrador',
     'Secretario': '/secretario',
+    'Presidente': '/presidente',
     'Usuario': '/usuario',
-    'Presidente': '/usuario',
     'Vicepresidente': '/usuario',
     'Tesorero': '/usuario',
     'Fiscal': '/usuario',
