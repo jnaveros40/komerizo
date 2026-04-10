@@ -127,7 +127,6 @@ export default function UsuarioSalonPage() {
       if (!storedUser) return;
 
       const userData = JSON.parse(storedUser);
-      console.log('Usuario cargado:', userData);
       setUsuario(userData);
 
       // Obtener rol actual del usuario
@@ -172,15 +171,11 @@ export default function UsuarioSalonPage() {
 
       // Cargar alquileres del usuario actual
       if (userData?.id) {
-        console.log('Cargando alquileres para usuario:', userData.id);
-        const { data: misAlquileresData, error: errorAlquileres } = await supabase
+        const { data: misAlquileresData } = await supabase
           .from('komerizo_alquileres')
-          .select('*, komerizo_alquiler_items(*)')
+          .select('*, komerizo_alquiler_items(*, komerizo_inventario(id, nombre))')
           .eq('usuario_id', userData.id)
           .order('fecha_inicio', { ascending: false });
-
-        console.log('Alquileres cargados:', misAlquileresData);
-        console.log('Error al cargar alquileres:', errorAlquileres);
 
         if (misAlquileresData) {
           setMisAlquileres(misAlquileresData);
@@ -193,13 +188,7 @@ export default function UsuarioSalonPage() {
     }
   };
 
-  // Debug: Log reservas when loaded
-  useEffect(() => {
-    console.log('Reservas cargadas del servidor:', reservas);
-    if (reservas.length > 0) {
-      console.log('Primera reserva:', reservas[0]);
-    }
-  }, [reservas]);
+
 
   // Sincronizar fecha seleccionada del calendario con el formulario
   useEffect(() => {
@@ -387,10 +376,7 @@ export default function UsuarioSalonPage() {
     setPrecioItems(total);
   }, [itemsSeleccionados]);
 
-  // Debug: Log cuando misAlquileres cambia
-  useEffect(() => {
-    console.log('🔄 misAlquileres actualizados:', misAlquileres);
-  }, [misAlquileres]);
+
 
   // Cancelar alquiler
   const handleCancelarAlquiler = async (alquilerId: number) => {
@@ -422,10 +408,7 @@ export default function UsuarioSalonPage() {
       // Comparar solo fecha, sin hora
       const dateToCompare = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       
-      console.log('Checking date:', dateToCompare, 'Against reservation:', r.fecha_inicio, 'to', r.fecha_fin, 'Parsed:', rStart, 'to', rEnd);
-      const isReserved = dateToCompare >= rStart && dateToCompare <= rEnd;
-      if (isReserved) console.log('DATE IS RESERVED');
-      return isReserved;
+      return dateToCompare >= rStart && dateToCompare <= rEnd;
     });
   };
 
@@ -513,7 +496,6 @@ export default function UsuarioSalonPage() {
       {/* MIS ALQUILERES */}
       <div style={{ background: '#1e2a3a', padding: '2rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid #3a4a5f' }}>
         <h2 style={{ marginBottom: '1.5rem', color: '#fff' }}>📋 Mis Alquileres</h2>
-        {console.log('🎨 RENDER - misAlquileres.length:', misAlquileres.length)}
         
         {misAlquileres.length === 0 ? (
           <p style={{ color: '#a1aec6', textAlign: 'center', padding: '1rem' }}>No tienes alquileres registrados</p>
@@ -596,13 +578,56 @@ export default function UsuarioSalonPage() {
                 {/* Items del alquiler */}
                 {alquiler.komerizo_alquiler_items && alquiler.komerizo_alquiler_items.length > 0 && (
                   <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #3a4a5f' }}>
-                    <div style={{ color: '#a1aec6', fontSize: '0.85rem', marginBottom: '0.5rem' }}>📦 Items Incluidos:</div>
-                    {alquiler.komerizo_alquiler_items.map((item: any) => (
-                      <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', color: '#a1aec6', fontSize: '0.85rem', paddingLeft: '1rem' }}>
-                        <span>{item.cantidad_alquilada}x {item.inventario_id}</span>
-                        <span>${item.valor_total.toFixed(2)}</span>
-                      </div>
-                    ))}
+                    <div style={{ color: '#6c5ce7', fontSize: '0.9rem', marginBottom: '0.75rem', fontWeight: 'bold' }}>📦 Artículos Incluidos:</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                      {alquiler.komerizo_alquiler_items.map((item: any) => (
+                        <div
+                          key={item.id}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                            gap: '1rem',
+                            padding: '0.75rem',
+                            background: '#0f1419',
+                            borderRadius: '4px',
+                            border: '1px solid #3a4a5f',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {/* Nombre del item */}
+                          <div>
+                            <div style={{ color: '#a1aec6', fontSize: '0.75rem' }}>Articulo</div>
+                            <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                              {item.komerizo_inventario?.nombre || 'Item'}
+                            </div>
+                          </div>
+
+                          {/* Cantidad */}
+                          <div>
+                            <div style={{ color: '#a1aec6', fontSize: '0.75rem' }}>Cantidad</div>
+                            <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                              {item.cantidad_alquilada}
+                            </div>
+                          </div>
+
+                          {/* Valor Unitario */}
+                          <div>
+                            <div style={{ color: '#a1aec6', fontSize: '0.75rem' }}>V. Unitario</div>
+                            <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                              ${item.valor_unitario.toFixed(2)}
+                            </div>
+                          </div>
+
+                          {/* Valor Total */}
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ color: '#a1aec6', fontSize: '0.75rem' }}>Subtotal</div>
+                            <div style={{ color: '#6c5ce7', fontWeight: 'bold', fontSize: '1rem' }}>
+                              ${item.valor_total.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
