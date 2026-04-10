@@ -11,13 +11,14 @@ export default function UsuarioInformacionPage() {
   const [barrioName, setBarrioName] = useState('')
   const [tipoDocumento, setTipoDocumento] = useState('')
   const [usuarioData, setUsuarioData] = useState<any>(null)
+  const [roles, setRoles] = useState<any[]>([])
 
   useEffect(() => {
     fetchUserData()
   }, [user])
 
   const fetchUserData = async () => {
-    if (!user) return
+    if (!user?.id) return
 
     try {
       // Obtener datos frescos del usuario de Supabase
@@ -30,8 +31,23 @@ export default function UsuarioInformacionPage() {
       if (userError) throw userError
       setUsuarioData(userData)
 
+      // Obtener roles del usuario
+      const { data: userRolesData, error: rolesError } = await supabase
+        .from('komerizo_usuario_roles')
+        .select('rol_id')
+        .eq('usuario_id', user.id)
+
+      if (!rolesError && userRolesData && userRolesData.length > 0) {
+        const roleIds = userRolesData.map((ur: any) => ur.rol_id)
+        const { data: rolesData } = await supabase
+          .from('komerizo_roles')
+          .select('id, nombre')
+          .in('id', roleIds)
+        setRoles(rolesData || [])
+      }
+
       // Comuna
-      if (userData.comuna_id) {
+      if (userData?.comuna_id) {
         const { data: comunaData } = await supabase
           .from('komerizo_comunas')
           .select('nombre')
@@ -41,7 +57,7 @@ export default function UsuarioInformacionPage() {
       }
 
       // Barrio
-      if (userData.barrio_id) {
+      if (userData?.barrio_id) {
         const { data: barrioData } = await supabase
           .from('komerizo_barrios')
           .select('nombre')
@@ -51,7 +67,7 @@ export default function UsuarioInformacionPage() {
       }
 
       // Tipo de documento
-      if (userData.tipo_documento_id) {
+      if (userData?.tipo_documento_id) {
         const { data: tipoDocData } = await supabase
           .from('komerizo_tipo_documento')
           .select('nombre')
@@ -132,8 +148,8 @@ export default function UsuarioInformacionPage() {
         <div className="info-section">
           <h3>Roles Asignados</h3>
           <div className="roles-list">
-            {user?.roles && user.roles.length > 0 ? (
-              user.roles.map((role: any) => (
+            {roles && roles.length > 0 ? (
+              roles.map((role: any) => (
                 <div key={role.id} className="role-item">
                   <span className={`role-badge ${role.nombre.toLowerCase().replace(/ /g, '-')}`}>{role.nombre}</span>
                 </div>
@@ -147,8 +163,9 @@ export default function UsuarioInformacionPage() {
 
       <div className="info-note">
         <p>
-          Para actualizar tu información personal, contacta con la directiva de tu JAC.
           Los datos mostrados aquí son los registrados en el sistema.
+          Recuerda que puedes editar tu informacion personal en el menu Mi Perfil.
+                    
         </p>
       </div>
     </div>
