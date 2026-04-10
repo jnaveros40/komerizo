@@ -11,6 +11,16 @@ type Rol = {
   descripcion: string
 }
 
+type Solicitud = {
+  id: number
+  destinatario_rol_id: number
+  mensaje_solicitud: string
+  fecha_solicitud: string
+  mensaje_respuesta: string
+  fecha_respuesta: string | null
+  estado: string
+}
+
 export default function SolicitarInformePage() {
   const { user } = useAuth()
   const [roles, setRoles] = useState<Rol[]>([])
@@ -21,10 +31,33 @@ export default function SolicitarInformePage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [rolesLoading, setRolesLoading] = useState(true)
+  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([])
+  const [solicitudesLoading, setSolicitudesLoading] = useState(true)
 
   useEffect(() => {
     fetchRoles()
-  }, [])
+    fetchSolicitudes()
+  }, [user])
+
+  const fetchSolicitudes = async () => {
+    if (!user?.id) return
+
+    try {
+      setSolicitudesLoading(true)
+      const { data, error } = await supabase
+        .from('komerizo_solicitud_informes')
+        .select('*')
+        .eq('usuario_id', user.id)
+        .order('fecha_solicitud', { ascending: false })
+
+      if (error) throw error
+      setSolicitudes(data || [])
+    } catch (error) {
+      console.error('Error al cargar solicitudes:', error)
+    } finally {
+      setSolicitudesLoading(false)
+    }
+  }
 
   const fetchRoles = async () => {
     try {
@@ -89,6 +122,9 @@ export default function SolicitarInformePage() {
         destinatario_rol_id: '',
         mensaje_solicitud: '',
       })
+
+      // Recargar solicitudes
+      fetchSolicitudes()
 
       // Limpiar mensaje después de 3 segundos
       setTimeout(() => {
@@ -183,6 +219,64 @@ export default function SolicitarInformePage() {
               revisará tu solicitud y te proporcionará el informe en el tiempo establecido.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Sección de Solicitudes Previas */}
+      <div className="info-card" style={{ marginTop: '2rem' }}>
+        <div className="info-section">
+          <h3>📜 Mis Solicitudes de Informe</h3>
+
+          {solicitudesLoading ? (
+            <div className="loading-state">
+              <p>⏳ Cargando solicitudes...</p>
+            </div>
+          ) : solicitudes.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">📋</div>
+              <h3>No hay solicitudes</h3>
+              <p>Aún no has enviado ninguna solicitud de informe.</p>
+            </div>
+          ) : (
+            <div className="solicitudes-container">
+              {solicitudes.map((solicitud) => (
+                <div key={solicitud.id} className="solicitud-card">
+                  <div className="solicitud-header">
+                    <div className="solicitud-row">
+                      <span className="label">Solicitado a:</span>
+                      <span className="value">Rol ID: {solicitud.destinatario_rol_id}</span>
+                    </div>
+                    <span
+                      className={`status-badge ${
+                        solicitud.estado === 'Respondido'
+                          ? 'status-respondido'
+                          : 'status-pendiente'
+                      }`}
+                    >
+                      {solicitud.estado}
+                    </span>
+                  </div>
+
+                  <div className="solicitud-body">
+                    <div className="solicitud-row">
+                      <span className="label">Tu Solicitud (Fecha: {new Date(solicitud.fecha_solicitud).toLocaleDateString()}):</span>
+                    </div>
+                    <p className="solicitud-mensaje">{solicitud.mensaje_solicitud}</p>
+
+                    {solicitud.estado === 'Respondido' && (
+                      <>
+                        <div className="solicitud-divider"></div>
+                        <div className="solicitud-row">
+                          <span className="label">Respuesta (Fecha: {new Date(solicitud.fecha_respuesta || '').toLocaleDateString()}):</span>
+                        </div>
+                        <p className="solicitud-respuesta">{solicitud.mensaje_respuesta}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
