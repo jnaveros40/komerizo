@@ -9,9 +9,6 @@ type Afiliado = {
   id: number
   nombre: string
   apellido: string
-  cc: string
-  correo_electronico: string
-  telefono: string | null
   estado: string
   barrio_id: number
 }
@@ -50,7 +47,7 @@ export default function AfiliadosPage() {
       // Obtener todos los afiliados del mismo barrio
       const { data: afiliadosData, error } = await supabase
         .from('komerizo_usuarios')
-        .select('id, nombre, apellido, cc, correo_electronico, telefono, estado, barrio_id')
+        .select('id, nombre, apellido, estado, barrio_id')
         .eq('barrio_id', user.barrio_id)
         .order('nombre', { ascending: true })
 
@@ -131,9 +128,6 @@ export default function AfiliadosPage() {
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th>Cédula</th>
-                  <th>Correo</th>
-                  <th>Teléfono</th>
                   <th>Estado</th>
                 </tr>
               </thead>
@@ -142,21 +136,6 @@ export default function AfiliadosPage() {
                   <tr key={afiliado.id}>
                     <td className="nombre-cell">
                       <strong>{afiliado.nombre} {afiliado.apellido}</strong>
-                    </td>
-                    <td>{afiliado.cc}</td>
-                    <td className="email-cell">
-                      <a href={`mailto:${afiliado.correo_electronico}`}>
-                        {afiliado.correo_electronico}
-                      </a>
-                    </td>
-                    <td className="phone-cell">
-                      {afiliado.telefono ? (
-                        <a href={`tel:${afiliado.telefono}`}>
-                          {afiliado.telefono}
-                        </a>
-                      ) : (
-                        '-'
-                      )}
                     </td>
                     <td>
                       <span className={`status-badge ${obtenerColorEstado(afiliado.estado)}`}>
@@ -173,7 +152,7 @@ export default function AfiliadosPage() {
 
       <div className="info-note">
         <p>
-          Aquí puedes ver todos los afiliados registrados en tu barrio. Los contactos están disponibles para que puedas comunicarte con otros miembros de la comunidad.
+          Aquí puedes ver todos los afiliados registrados en tu barrio. La información se muestra de forma limitada por protección de datos personales.
         </p>
       </div>
     </div>
