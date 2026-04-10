@@ -20,8 +20,8 @@ export function getRedirectUrlByRole(roles: Array<{ id: number; nombre: string }
     'Delegados a Asojuntas': '/delegados-asojuntas',
     'Coordinadores de Comisiones de Trabajo': '/coordinadores-comisiones',
     'Vocal': '/vocal',
+    'Junta Directiva': '/junta-directiva',
     'Usuario': '/usuario',
-    'Junta Directiva': '/usuario',
     'Coordinador Comisión Empresarial': '/usuario',
     'Miembro': '/usuario',
   }

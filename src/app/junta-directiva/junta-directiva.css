@@ -1,0 +1,157 @@
+.junta-directiva-page {
+  padding: 2rem;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.junta-directiva-header {
+  margin-bottom: 3rem;
+  animation: fadeInDown 0.5s ease-out;
+}
+
+.junta-directiva-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  margin-bottom: 0.5rem;
+}
+
+.junta-directiva-header p {
+  font-size: 1rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.junta-directiva-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.location-card,
+.welcome-card,
+.quick-access-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.location-card:hover,
+.welcome-card:hover,
+.quick-access-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+  transform: translateY(-4px);
+}
+
+.location-card {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.location-icon {
+  font-size: 2.5rem;
+}
+
+.location-content {
+  flex: 1;
+}
+
+.location-label {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.location-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin: 0 0 0.25rem 0;
+}
+
+.location-barrio {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.welcome-card h2,
+.quick-access-card h3 {
+  color: #f3f4f6;
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+}
+
+.welcome-card p {
+  color: #d1d5db;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.quick-access-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quick-access-card li {
+  color: #d1d5db;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #374151;
+  font-size: 0.95rem;
+}
+
+.quick-access-card li:last-child {
+  border-bottom: none;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .junta-directiva-page {
+    padding: 1rem;
+  }
+
+  .junta-directiva-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .junta-directiva-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .location-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
