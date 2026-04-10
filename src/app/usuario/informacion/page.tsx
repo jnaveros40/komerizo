@@ -86,7 +86,7 @@ export default function UsuarioInformacionPage() {
     try {
       setLoadingCertificate(true)
       
-      // Obtener Presidentes y Secretarios
+      // Obtener Presidentes y Secretarios que pertenezcan a la misma comuna
       const { data: rolesData } = await supabase
         .from('komerizo_roles')
         .select('id, nombre')
@@ -94,8 +94,9 @@ export default function UsuarioInformacionPage() {
 
       const roleIds = rolesData?.map((r: any) => r.id) || []
 
-      // Obtener usuarios con estos roles
-      let dirigentesList: any[] = []
+      // Obtener usuarios con estos roles y misma comuna
+      let dirigentes: any = { presidente: null, secretario: null }
+      
       if (roleIds.length > 0) {
         const { data: usuariosRolesData } = await supabase
           .from('komerizo_usuario_roles')
@@ -104,12 +105,28 @@ export default function UsuarioInformacionPage() {
 
         if (usuariosRolesData && usuariosRolesData.length > 0) {
           const usuarioIds = usuariosRolesData.map((ur: any) => ur.usuario_id)
+          
+          // Obtener usuarios completos
           const { data: usuariosData } = await supabase
             .from('komerizo_usuarios')
-            .select('nombre, apellido')
+            .select('id, nombre, apellido, cc, telefono, correo_electronico, comuna_id')
             .in('id', usuarioIds)
-          
-          dirigentesList = usuariosData || []
+            .eq('comuna_id', usuarioData?.comuna_id)
+
+          if (usuariosData && usuariosData.length > 0) {
+            // Filtrar por rol
+            usuariosRolesData.forEach((ur: any) => {
+              const usuario = usuariosData.find((u: any) => u.id === ur.usuario_id)
+              if (usuario) {
+                const roleName = rolesData?.find((r: any) => r.id === ur.rol_id)?.nombre
+                if (roleName === 'Presidente') {
+                  dirigentes.presidente = { ...usuario, rol: roleName }
+                } else if (roleName === 'Secretario') {
+                  dirigentes.secretario = { ...usuario, rol: roleName }
+                }
+              }
+            })
+          }
         }
       }
 
@@ -120,116 +137,234 @@ export default function UsuarioInformacionPage() {
         format: 'a4',
       })
 
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageMargin = 15
+      const contentWidth = pageWidth - (pageMargin * 2)
+      
       // Color scheme
-      const primaryColor: [number, number, number] = [32, 76, 175] // #204cab azul
-      const textColor: [number, number, number] = [51, 51, 51] // Gris oscuro
-      const lightGray: [number, number, number] = [200, 200, 200]
+      const primaryColor: [number, number, number] = [32, 76, 175]
+      const textColor: [number, number, number] = [51, 51, 51]
 
       // Encabezado
       pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
-      pdf.rect(0, 0, 210, 35, 'F')
+      pdf.rect(0, 0, pageWidth, 30, 'F')
 
-      // Título
       pdf.setTextColor(255, 255, 255)
-      pdf.setFontSize(24)
-      pdf.text('CERTIFICADO DE AFILIACIÓN', 105, 15, { align: 'center' })
-      pdf.setFontSize(10)
-      pdf.text('Komerizo - JAC Management System', 105, 23, { align: 'center' })
+      pdf.setFontSize(18)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('CERTIFICADO DE AFILIACIÓN', pageWidth / 2, 12, { align: 'center' })
+      pdf.setFontSize(9)
+      pdf.setFont('helvetica', 'normal')
+      pdf.text('Komerizo - JAC Management System', pageWidth / 2, 22, { align: 'center' })
 
       // Contenido principal
       pdf.setTextColor(textColor[0], textColor[1], textColor[2])
-      pdf.setFontSize(11)
-
       let yPosition = 45
 
-      // Sección de información
-      pdf.setFontSize(12)
+      // Texto principal del certificado
+      pdf.setFontSize(11)
+      pdf.setFont('helvetica', 'normal')
+
+      const barrio = barrioName ? `Barrio ${barrioName}` : 'Barrio de esta localidad'
+      const nombreComunaNum = comunaName ? `${comunaName}` : 'esta Comuna'
+
+      const numeroComuna = usuarioData?.comuna_id || '0'
+
+      // Texto introductorio centrado, negrita
       pdf.setFont('helvetica', 'bold')
-      pdf.text('INFORMACIÓN DEL AFILIADO', 15, yPosition)
+      pdf.setFontSize(11)
+      const textoIntroduction = `La Junta de Acción Comunal del ${barrio} de la Comuna ${numeroComuna}`
+      const textoPrincipal = pdf.splitTextToSize(textoIntroduction, contentWidth)
+      pdf.text(textoPrincipal, pageWidth / 2, yPosition, { align: 'center' })
+      yPosition += textoPrincipal.length * 6 + 3
+
+      // "CERTIFICA:" con tamaño aumentado, centrado, negrita
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(14)
+      pdf.text('CERTIFICA:', pageWidth / 2, yPosition, { align: 'center' })
       yPosition += 8
+
+      // Párrafo de certificación - forma simplificada
+      const nombreCompleto = `${usuarioData?.nombre || ''} ${usuarioData?.apellido || ''}`
+      const estado = 'Activo'
+      const tipoDoc = `${tipoDocumento || 'Documento'}`
+      const noCedula = `${usuarioData?.cc || 'N/A'}`
+
+      pdf.setFont('helvetica', 'normal')
+      pdf.setFontSize(11)
+
+      // Construir el texto completo sin marcadores especiales
+      const textoCertificacionCompleto = `Que la persona ${nombreCompleto}, identificado con ${tipoDoc} número ${noCedula}, se encuentra en estado ${estado}.`
+
+      // Dividir en líneas que caben en el ancho disponible
+      const lineasCert = pdf.splitTextToSize(textoCertificacionCompleto, contentWidth)
+
+      // Dibujar línea por línea
+      lineasCert.forEach((linea: string) => {
+        // Usar un enfoque más simple: simplemente dibujar cada línea
+        // Las palabras en negrita se aplicaran de forma aproximada
+        if (linea.includes(nombreCompleto)) {
+          // Reemplazar el nombre con versión en negrita
+          const partes = linea.split(nombreCompleto)
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(partes[0], pageMargin, yPosition)
+          
+          const anchoAntes = pdf.getTextWidth(partes[0])
+          pdf.setFont('helvetica', 'bold')
+          pdf.text(nombreCompleto, pageMargin + anchoAntes, yPosition)
+          
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(partes[1], pageMargin + anchoAntes + pdf.getTextWidth(nombreCompleto), yPosition)
+        } else if (linea.includes(`${tipoDoc} número ${noCedula}`)) {
+          const docInfo = `${tipoDoc} número ${noCedula}`
+          const partes = linea.split(docInfo)
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(partes[0], pageMargin, yPosition)
+          
+          const anchoAntes = pdf.getTextWidth(partes[0])
+          pdf.setFont('helvetica', 'bold')
+          pdf.text(docInfo, pageMargin + anchoAntes, yPosition)
+          
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(partes[1], pageMargin + anchoAntes + pdf.getTextWidth(docInfo), yPosition)
+        } else if (linea.includes(estado)) {
+          const partes = linea.split(estado)
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(partes[0], pageMargin, yPosition)
+          
+          const anchoAntes = pdf.getTextWidth(partes[0])
+          pdf.setFont('helvetica', 'bold')
+          pdf.text(estado, pageMargin + anchoAntes, yPosition)
+          
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(partes[1], pageMargin + anchoAntes + pdf.getTextWidth(estado), yPosition)
+        } else {
+          pdf.setFont('helvetica', 'normal')
+          pdf.text(linea, pageMargin, yPosition)
+        }
+
+        yPosition += 6
+      })
+
+      yPosition += 2
+
+      yPosition += 8
+
+      // Datos reportados
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('Los datos reportados son los siguientes:', pageMargin, yPosition)
+      yPosition += 7
 
       pdf.setFont('helvetica', 'normal')
       pdf.setFontSize(10)
 
-      // Detalles del usuario
-      const details = [
-        { label: 'Nombre:', value: `${usuarioData?.nombre || ''} ${usuarioData?.apellido || ''}` },
-        { label: 'Tipo Documento:', value: tipoDocumento || 'N/A' },
-        { label: 'Cédula:', value: usuarioData?.cc || 'N/A' },
-        { label: 'Teléfono:', value: usuarioData?.telefono || 'N/A' },
-        { label: 'Correo:', value: usuarioData?.correo_electronico || 'N/A' },
-        { label: 'Dirección:', value: usuarioData?.direccion || 'N/A' },
-        { label: 'Comuna:', value: comunaName || 'N/A' },
-        { label: 'Barrio:', value: barrioName || 'N/A' },
+      const datosReportados = [
+        `Correo Electrónico: ${usuarioData?.correo_electronico || 'N/A'}`,
+        `Teléfono: ${usuarioData?.telefono || 'N/A'}`,
+        `Dirección: ${usuarioData?.direccion || 'N/A'}`,
       ]
 
-      details.forEach((detail) => {
-        pdf.setFont('helvetica', 'bold')
-        pdf.text(detail.label, 15, yPosition)
-        pdf.setFont('helvetica', 'normal')
-        pdf.text(detail.value, 50, yPosition)
-        yPosition += 7
+      datosReportados.forEach((dato) => {
+        pdf.text(dato, pageMargin + 5, yPosition)
+        yPosition += 6
       })
 
-      // Información del documento
+      // Fecha de generación
       yPosition += 5
-      pdf.setFontSize(12)
+      const now = new Date()
+      const diasSemana = [
+        'domingo',
+        'lunes',
+        'martes',
+        'miércoles',
+        'jueves',
+        'viernes',
+        'sábado',
+      ]
+      const meses = [
+        'enero',
+        'febrero',
+        'marzo',
+        'abril',
+        'mayo',
+        'junio',
+        'julio',
+        'agosto',
+        'septiembre',
+        'octubre',
+        'noviembre',
+        'diciembre',
+      ]
+
+      const diaSemana = diasSemana[now.getDay()]
+      const dia = now.getDate()
+      const mes = meses[now.getMonth()]
+      const year = now.getFullYear()
+      const horas = String(now.getHours()).padStart(2, '0')
+      const minutos = String(now.getMinutes()).padStart(2, '0')
+      const segundos = String(now.getSeconds()).padStart(2, '0')
+
+      const fechaFormato = `${diaSemana} ${dia} de ${mes} de ${year} a las ${horas}:${minutos}:${segundos}`
+      const textoFecha = `La presente certificación se genera mediante software el día ${fechaFormato}.`
+
+      const textoFechaArray = pdf.splitTextToSize(textoFecha, contentWidth)
+      pdf.setFontSize(9)
+      pdf.setFont('helvetica', 'italic')
+      pdf.text(textoFechaArray, pageMargin, yPosition)
+      yPosition += textoFechaArray.length * 5 + 10
+
+      // Sección de Dirigentas
       pdf.setFont('helvetica', 'bold')
-      pdf.text('ESTADO DEL DOCUMENTO', 15, yPosition)
+      pdf.setFontSize(11)
+      pdf.text('DIRECTIVA DE LA ORGANIZACIÓN', pageMargin, yPosition)
       yPosition += 8
 
       pdf.setFont('helvetica', 'normal')
       pdf.setFontSize(10)
-      
-      const now = new Date()
-      const dateStr = now.toLocaleDateString('es-CO', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      })
-      const timeStr = now.toLocaleTimeString('es-CO')
 
-      pdf.text(`Fecha de Descarga: ${dateStr}`, 15, yPosition)
-      yPosition += 7
-      pdf.text(`Hora de Descarga: ${timeStr}`, 15, yPosition)
-      yPosition += 7
-      pdf.text(`Estado: Activo`, 15, yPosition)
-      yPosition += 7
-      pdf.text(`Afiliación Válida: Sí`, 15, yPosition)
+      // Presidente
+      if (dirigentes.presidente) {
+        const pres = dirigentes.presidente
+        pdf.setFont('helvetica', 'bold')
+        pdf.text(`${pres.nombre} ${pres.apellido}`, pageMargin, yPosition)
+        yPosition += 6
 
-      // Pie de página con dirigentas
-      yPosition += 15
-      pdf.setFillColor(lightGray[0], lightGray[1], lightGray[2])
-      pdf.rect(0, yPosition - 5, 210, 80, 'F')
-
-      yPosition += 5
-      pdf.setFontSize(11)
-      pdf.setFont('helvetica', 'bold')
-      pdf.text('DIRECTIVA DE LA ORGANIZACIÓN', 15, yPosition)
-      yPosition += 8
-
-      pdf.setFont('helvetica', 'normal')
-      pdf.setFontSize(9)
-
-      if (dirigentesList.length > 0) {
-        let col1Count = Math.ceil(dirigentesList.length / 2)
-        let col1X = 15
-        let col2X = 110
-        let currentY1 = yPosition
-        let currentY2 = yPosition
-
-        dirigentesList.forEach((dirigente, index) => {
-          const fullName = `${dirigente.nombre} ${dirigente.apellido}`
-          if (index < col1Count) {
-            pdf.text(`• ${fullName}`, col1X, currentY1)
-            currentY1 += 5
-          } else {
-            pdf.text(`• ${fullName}`, col2X, currentY2)
-            currentY2 += 5
-          }
-        })
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(9)
+        pdf.text(`Rol: ${pres.rol}`, pageMargin + 3, yPosition)
+        yPosition += 5
+        pdf.text(`Cédula: ${pres.cc}`, pageMargin + 3, yPosition)
+        yPosition += 5
+        pdf.text(`Teléfono: ${pres.telefono}`, pageMargin + 3, yPosition)
+        yPosition += 5
+        pdf.text(`Correo: ${pres.correo_electronico}`, pageMargin + 3, yPosition)
+        yPosition += 8
       } else {
-        pdf.text('No hay directiva registrada', 15, yPosition)
+        pdf.setFontSize(9)
+        pdf.text('Presidente: No asignado en esta comuna', pageMargin, yPosition)
+        yPosition += 8
+      }
+
+      // Secretario
+      if (dirigentes.secretario) {
+        const sec = dirigentes.secretario
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(10)
+        pdf.text(`${sec.nombre} ${sec.apellido}`, pageMargin, yPosition)
+        yPosition += 6
+
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(9)
+        pdf.text(`Rol: ${sec.rol}`, pageMargin + 3, yPosition)
+        yPosition += 5
+        pdf.text(`Cédula: ${sec.cc}`, pageMargin + 3, yPosition)
+        yPosition += 5
+        pdf.text(`Teléfono: ${sec.telefono}`, pageMargin + 3, yPosition)
+        yPosition += 5
+        pdf.text(`Correo: ${sec.correo_electronico}`, pageMargin + 3, yPosition)
+      } else {
+        pdf.setFontSize(9)
+        pdf.text('Secretario: No asignado en esta comuna', pageMargin, yPosition)
       }
 
       // Descargar PDF
