@@ -42,6 +42,11 @@ export default function TesoreroSidebar({ user }: { user: any }) {
       icon: '📦',
     },
     {
+      label: 'Salón Comunal',
+      href: '/tesorero/salon',
+      icon: '🏛️',
+    },
+    {
       label: 'Finanzas',
       href: '/tesorero/finanzas',
       icon: '💰',
