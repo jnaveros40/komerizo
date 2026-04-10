@@ -33,12 +33,28 @@ export default function UsuarioSalonPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+  // Obtener fecha actual en zona local sin desfase
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Formatear fecha de forma correcta sin desfase de zona horaria
+  const formatearFecha = (fechaString: string) => {
+    const [year, month, day] = fechaString.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
   const [showFormReserva, setShowFormReserva] = useState(false);
   const [formReserva, setFormReserva] = useState({
     tipo_alquiler: 'por_hora' as 'por_hora' | 'por_dia',
     cantidad: 1,
-    fecha_inicio: new Date().toISOString().split('T')[0],
-    fecha_fin: new Date().toISOString().split('T')[0],
+    fecha_inicio: getTodayDate(),
+    fecha_fin: getTodayDate(),
     hora_inicio: '08:00',
     hora_fin: '09:00',
     motivo: '',
@@ -57,6 +73,25 @@ export default function UsuarioSalonPage() {
       calcularPrecio();
     }
   }, [formReserva, config]);
+
+  // Calcular cantidad de horas automáticamente cuando cambian las horas
+  useEffect(() => {
+    if (formReserva.tipo_alquiler === 'por_hora' && formReserva.hora_inicio && formReserva.hora_fin) {
+      const [horaInicio, minInicio] = formReserva.hora_inicio.split(':').map(Number);
+      const [horaFin, minFin] = formReserva.hora_fin.split(':').map(Number);
+      
+      const minutosInicio = horaInicio * 60 + minInicio;
+      const minutosFin = horaFin * 60 + minFin;
+      
+      const diferencia = minutosFin - minutosInicio;
+      const horas = Math.max(1, Math.ceil(diferencia / 60)); // Mínimo 1 hora
+      
+      setFormReserva(prev => ({
+        ...prev,
+        cantidad: horas
+      }));
+    }
+  }, [formReserva.hora_inicio, formReserva.hora_fin, formReserva.tipo_alquiler]);
 
   const loadData = async () => {
     try {
@@ -101,6 +136,22 @@ export default function UsuarioSalonPage() {
     }
   };
 
+  // Sincronizar fecha seleccionada del calendario con el formulario
+  useEffect(() => {
+    if (selectedDate) {
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const fechaFormato = `${year}-${month}-${day}`;
+      
+      setFormReserva(prev => ({
+        ...prev,
+        fecha_inicio: fechaFormato,
+        fecha_fin: fechaFormato
+      }));
+    }
+  }, [selectedDate]);
+
   const calcularPrecio = () => {
     if (!config) return;
 
@@ -144,8 +195,8 @@ export default function UsuarioSalonPage() {
           rol_id: userRole?.id,
           fecha_inicio: formReserva.fecha_inicio,
           fecha_fin: formReserva.fecha_fin,
-          hora_inicio: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_inicio : null,
-          hora_fin: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_fin : null,
+          hora_inicio: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_inicio : config.hora_apertura,
+          hora_fin: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_fin : config.hora_cierre,
           tipo_alquiler: formReserva.tipo_alquiler,
           cantidad: formReserva.cantidad,
           valor_total: precioEstimado,
@@ -161,8 +212,8 @@ export default function UsuarioSalonPage() {
       setFormReserva({
         tipo_alquiler: 'por_hora',
         cantidad: 1,
-        fecha_inicio: new Date().toISOString().split('T')[0],
-        fecha_fin: new Date().toISOString().split('T')[0],
+        fecha_inicio: getTodayDate(),
+        fecha_fin: getTodayDate(),
         hora_inicio: '08:00',
         hora_fin: '09:00',
         motivo: '',
@@ -365,19 +416,27 @@ export default function UsuarioSalonPage() {
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>Cantidad:</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>
+                  {formReserva.tipo_alquiler === 'por_hora' ? 'Horas (calculadas)' : 'Cantidad de Días'}
+                </label>
                 <input
                   type="number"
                   min="1"
                   value={formReserva.cantidad}
-                  onChange={(e) => setFormReserva({ ...formReserva, cantidad: parseInt(e.target.value) })}
+                  onChange={(e) => 
+                    formReserva.tipo_alquiler === 'por_dia' 
+                      ? setFormReserva({ ...formReserva, cantidad: parseInt(e.target.value) })
+                      : null
+                  }
+                  disabled={formReserva.tipo_alquiler === 'por_hora'}
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    background: '#0f1419',
+                    background: formReserva.tipo_alquiler === 'por_hora' ? '#2a3a4f' : '#0f1419',
                     color: '#fff',
                     border: '1px solid #3a4a5f',
                     borderRadius: '4px',
+                    cursor: formReserva.tipo_alquiler === 'por_hora' ? 'not-allowed' : 'text',
                   }}
                   required
                 />
@@ -386,11 +445,17 @@ export default function UsuarioSalonPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>Fecha de Inicio:</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>Fecha de la Reserva:</label>
                 <input
                   type="date"
                   value={formReserva.fecha_inicio}
-                  onChange={(e) => setFormReserva({ ...formReserva, fecha_inicio: e.target.value })}
+                  onChange={(e) =>
+                    setFormReserva({ 
+                      ...formReserva, 
+                      fecha_inicio: e.target.value,
+                      fecha_fin: e.target.value 
+                    })
+                  }
                   style={{
                     width: '100%',
                     padding: '0.75rem',
@@ -402,25 +467,6 @@ export default function UsuarioSalonPage() {
                   required
                 />
               </div>
-              {formReserva.tipo_alquiler === 'por_dia' && (
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>Fecha de Fin:</label>
-                  <input
-                    type="date"
-                    value={formReserva.fecha_fin}
-                    onChange={(e) => setFormReserva({ ...formReserva, fecha_fin: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: '#0f1419',
-                      color: '#fff',
-                      border: '1px solid #3a4a5f',
-                      borderRadius: '4px',
-                    }}
-                    required
-                  />
-                </div>
-              )}
             </div>
 
             {formReserva.tipo_alquiler === 'por_hora' && (
@@ -482,6 +528,18 @@ export default function UsuarioSalonPage() {
 
             {/* RESUMEN DE PRECIO */}
             <div style={{ background: '#0f1419', padding: '1.5rem', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #3a4a5f' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ color: '#a1aec6' }}>Fecha:</span>
+                <span style={{ color: '#fff' }}>{formatearFecha(formReserva.fecha_inicio)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ color: '#a1aec6' }}>Horario:</span>
+                <span style={{ color: '#fff' }}>
+                  {formReserva.tipo_alquiler === 'por_hora'
+                    ? `${formReserva.hora_inicio} - ${formReserva.hora_fin}`
+                    : `${config.hora_apertura} - ${config.hora_cierre}`}
+                </span>
+              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span style={{ color: '#a1aec6' }}>Cantidad:</span>
                 <span style={{ color: '#fff' }}>{formReserva.cantidad} {formReserva.tipo_alquiler === 'por_hora' ? 'horas' : 'días'}</span>
