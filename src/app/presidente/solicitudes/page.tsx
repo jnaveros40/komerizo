@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-import './solicitudes.css'
+import '@/components/solicitudes.css'
 
 interface Solicitud {
   id: string
