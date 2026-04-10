@@ -67,6 +67,7 @@ export default function PresidenteReuniones() {
 
   const [rolesDisponibles, setRolesDisponibles] = useState<{ id: number; nombre: string }[]>([]);
   const [confirmacionesMap, setConfirmacionesMap] = useState<Map<number, Confirmacion[]>>(new Map());
+  const [usuarioData, setUsuarioData] = useState<any>(null);
 
   // Obtener ID del presidente y cargar reuniones
   useEffect(() => {
@@ -83,6 +84,20 @@ export default function PresidenteReuniones() {
 
         const user = JSON.parse(storedUser);
         const usuarioId = user.id;
+
+        // Cargar datos completos del usuario (incluyendo comuna y barrio)
+        const { data: userData, error: userError } = await supabase
+          .from('komerizo_usuarios')
+          .select('id, nombre, cc, comuna_id, barrio_id')
+          .eq('id', usuarioId)
+          .single();
+
+        if (userError) {
+          console.error('Error cargando datos del usuario:', userError);
+        } else if (userData) {
+          console.log('✅ Datos del usuario cargados:', userData);
+          setUsuarioData(userData);
+        }
 
         // Obtener todos los roles disponibles
         const { data: allRoles, error: allRolesError } = await supabase
@@ -174,26 +189,39 @@ export default function PresidenteReuniones() {
       const user = JSON.parse(storedUser);
       const usuarioId = user.id;
 
-      const { error } = await supabase.from('komerizo_reuniones').insert([
-        {
-          creador_id: usuarioId,
-          titulo: formData.titulo,
-          descripcion: formData.descripcion,
-          tipo_reunion: formData.tipo_reunion,
-          lugar: formData.lugar,
-          fecha_reunion: formData.fecha_reunion,
-          hora_inicio: formData.hora_inicio,
-          hora_fin: formData.hora_fin,
-          es_obligatoria: formData.es_obligatoria,
-          requiere_confirmacion: formData.requiere_confirmacion,
-          roles_invitados: formData.roles_invitados,
-          comuna_id: null,
-          barrio_id: null,
-          estado: 'pendiente',
-        },
-      ]);
+      // Obtener comuna y barrio del usuario
+      const comunaId = usuarioData?.comuna_id || null;
+      const barrioId = usuarioData?.barrio_id || null;
 
-      if (error) throw error;
+      console.log('📝 Creando reunión con - Comuna:', comunaId, 'Barrio:', barrioId, 'usuarioData:', usuarioData);
+
+      const reunionData = {
+        creador_id: usuarioId,
+        titulo: formData.titulo,
+        descripcion: formData.descripcion,
+        tipo_reunion: formData.tipo_reunion,
+        lugar: formData.lugar,
+        fecha_reunion: formData.fecha_reunion,
+        hora_inicio: formData.hora_inicio,
+        hora_fin: formData.hora_fin,
+        es_obligatoria: formData.es_obligatoria,
+        requiere_confirmacion: formData.requiere_confirmacion,
+        roles_invitados: formData.roles_invitados,
+        comuna_id: comunaId,
+        barrio_id: barrioId,
+        estado: 'pendiente',
+      };
+
+      console.log('🔍 Datos a insertar:', JSON.stringify(reunionData, null, 2));
+
+      const { data: insertData, error } = await supabase.from('komerizo_reuniones').insert([reunionData]);
+
+      if (error) {
+        console.error('❌ Error insertando reunión:', error);
+        throw error;
+      }
+
+      console.log('✅ Reunión insertada:', insertData);
 
       alert('Reunión creada exitosamente');
       setShowForm(false);

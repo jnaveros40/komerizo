@@ -501,6 +501,41 @@
   background: #475569;
 }
 
+/* Mi Confirmación */
+.reunion-mi-confirmacion {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(100, 116, 139, 0.2);
+  border-left: 4px solid #64748b;
+  border-radius: 4px;
+}
+
+.confirmacion-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.confirmacion-badge.confirmado {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.confirmacion-badge.rechazado {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.confirmacion-badge.sin_responder {
+  background: rgba(107, 114, 128, 0.2);
+  color: #d1d5db;
+  border: 1px solid #6b7280;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .reuniones-container {
