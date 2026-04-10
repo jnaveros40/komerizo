@@ -42,6 +42,7 @@ interface ItemAlquilerSeleccionado {
 export default function UsuarioSalonPage() {
   const [config, setConfig] = useState<SalonConfig | null>(null);
   const [reservas, setReservas] = useState<Alquiler[]>([]);
+  const [misAlquileres, setMisAlquileres] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [usuario, setUsuario] = useState<any>(null);
   const [userRole, setUserRole] = useState<any>(null);
@@ -126,6 +127,7 @@ export default function UsuarioSalonPage() {
       if (!storedUser) return;
 
       const userData = JSON.parse(storedUser);
+      console.log('Usuario cargado:', userData);
       setUsuario(userData);
 
       // Obtener rol actual del usuario
@@ -166,6 +168,23 @@ export default function UsuarioSalonPage() {
 
       if (inventarioData) {
         setInventario(inventarioData);
+      }
+
+      // Cargar alquileres del usuario actual
+      if (userData?.id) {
+        console.log('Cargando alquileres para usuario:', userData.id);
+        const { data: misAlquileresData, error: errorAlquileres } = await supabase
+          .from('komerizo_alquileres')
+          .select('*, komerizo_alquiler_items(*)')
+          .eq('usuario_id', userData.id)
+          .order('fecha_inicio', { ascending: false });
+
+        console.log('Alquileres cargados:', misAlquileresData);
+        console.log('Error al cargar alquileres:', errorAlquileres);
+
+        if (misAlquileresData) {
+          setMisAlquileres(misAlquileresData);
+        }
       }
     } catch (error) {
       console.error('Error cargando datos:', error);
@@ -368,6 +387,33 @@ export default function UsuarioSalonPage() {
     setPrecioItems(total);
   }, [itemsSeleccionados]);
 
+  // Debug: Log cuando misAlquileres cambia
+  useEffect(() => {
+    console.log('🔄 misAlquileres actualizados:', misAlquileres);
+  }, [misAlquileres]);
+
+  // Cancelar alquiler
+  const handleCancelarAlquiler = async (alquilerId: number) => {
+    try {
+      if (!window.confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
+        return;
+      }
+
+      const { error } = await supabase
+        .from('komerizo_alquileres')
+        .update({ estado: 'cancelado' })
+        .eq('id', alquilerId);
+
+      if (error) throw error;
+
+      alert('Reserva cancelada exitosamente');
+      await loadData();
+    } catch (error) {
+      console.error('Error cancelando reserva:', error);
+      alert('Error al cancelar la reserva');
+    }
+  };
+
   const isDateReserved = (date: Date) => {
     return reservas.some((r) => {
       const rStart = parseLocalDate(r.fecha_inicio);
@@ -463,6 +509,113 @@ export default function UsuarioSalonPage() {
           <p style={{ color: '#a1aec6' }}>{config.descripcion}</p>
         </div>
       )}
+
+      {/* MIS ALQUILERES */}
+      <div style={{ background: '#1e2a3a', padding: '2rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid #3a4a5f' }}>
+        <h2 style={{ marginBottom: '1.5rem', color: '#fff' }}>📋 Mis Alquileres</h2>
+        {console.log('🎨 RENDER - misAlquileres.length:', misAlquileres.length)}
+        
+        {misAlquileres.length === 0 ? (
+          <p style={{ color: '#a1aec6', textAlign: 'center', padding: '1rem' }}>No tienes alquileres registrados</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+            {misAlquileres.map((alquiler) => (
+              <div
+                key={alquiler.id}
+                style={{
+                  background: '#151d27',
+                  padding: '1.5rem',
+                  borderRadius: '6px',
+                  border: `1px solid ${
+                    alquiler.estado === 'confirmado' ? '#6c5ce7' : alquiler.estado === 'cancelado' ? '#c0392b' : '#3a4a5f'
+                  }`,
+                }}
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+                  <div>
+                    <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Fechas</div>
+                    <div style={{ color: '#fff', fontWeight: 'bold' }}>
+                      {formatearFecha(alquiler.fecha_inicio)}
+                      {alquiler.fecha_inicio !== alquiler.fecha_fin && (
+                        <> → {formatearFecha(alquiler.fecha_fin)}</>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Horario</div>
+                    <div style={{ color: '#fff', fontWeight: 'bold' }}>{alquiler.hora_inicio} - {alquiler.hora_fin}</div>
+                  </div>
+                  
+                  <div>
+                    <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Tipo</div>
+                    <div style={{ color: '#fff', fontWeight: 'bold' }}>
+                      {alquiler.tipo_alquiler === 'por_hora' ? 'Por Hora' : 'Día Completo'}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Total</div>
+                    <div style={{ color: '#6c5ce7', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                      ${alquiler.valor_total.toFixed(2)}
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <span
+                      style={{
+                        padding: '0.4rem 0.8rem',
+                        background: alquiler.estado === 'confirmado' ? '#6c5ce7' : '#c0392b',
+                        color: '#fff',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {alquiler.estado.toUpperCase()}
+                    </span>
+                    {alquiler.estado === 'confirmado' && (
+                      <button
+                        onClick={() => handleCancelarAlquiler(alquiler.id)}
+                        style={{
+                          padding: '0.4rem 0.8rem',
+                          background: '#c0392b',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        ✕ Cancelar
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Items del alquiler */}
+                {alquiler.komerizo_alquiler_items && alquiler.komerizo_alquiler_items.length > 0 && (
+                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #3a4a5f' }}>
+                    <div style={{ color: '#a1aec6', fontSize: '0.85rem', marginBottom: '0.5rem' }}>📦 Items Incluidos:</div>
+                    {alquiler.komerizo_alquiler_items.map((item: any) => (
+                      <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', color: '#a1aec6', fontSize: '0.85rem', paddingLeft: '1rem' }}>
+                        <span>{item.cantidad_alquilada}x {item.inventario_id}</span>
+                        <span>${item.valor_total.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {alquiler.motivo && (
+                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #3a4a5f' }}>
+                    <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Motivo: <span style={{ color: '#fff' }}>{alquiler.motivo}</span></div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* CALENDARIO */}
       <div style={{ background: '#1e2a3a', padding: '2rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid #3a4a5f' }}>
