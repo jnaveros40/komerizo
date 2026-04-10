@@ -4,7 +4,7 @@ CREATE TABLE komerizo_tesoreria_saldo (
   saldo_actual DECIMAL(15, 2) DEFAULT 0,
   saldo_anterior DECIMAL(15, 2) DEFAULT 0,
   fecha_actualizacion TIMESTAMP DEFAULT NOW(),
-  actualizado_por BIGINT REFERENCES komerizo_usuarios(id),
+  actualizado_por BIGINT REFERENCES komerizo_usuarios(id) ON DELETE SET NULL,
   CONSTRAINT saldo_no_negativo CHECK (saldo_actual >= 0)
 );
 
@@ -20,7 +20,7 @@ CREATE TABLE komerizo_tesoreria (
   referencia_externa VARCHAR(100),
   estado VARCHAR(20) DEFAULT 'registrado' CHECK (estado IN ('registrado', 'anulado', 'rectificado')),
   usuario_id BIGINT NOT NULL REFERENCES komerizo_usuarios(id),
-  rol_id BIGINT REFERENCES komerizo_usuario_roles(id),
+  rol_id BIGINT REFERENCES komerizo_usuario_roles(id) ON DELETE SET NULL,
   creado_at TIMESTAMP DEFAULT NOW(),
   actualizado_at TIMESTAMP DEFAULT NOW(),
   
@@ -62,6 +62,6 @@ COMMENT ON COLUMN komerizo_tesoreria.justificacion IS 'Razón o justificación d
 COMMENT ON COLUMN komerizo_tesoreria.referencia_externa IS 'Número de recibo, factura, etc.';
 
 -- Inicializar saldo en cero
-INSERT INTO komerizo_tesoreria_saldo (saldo_actual, saldo_anterior, actualizado_por)
-VALUES (0, 0, 1)
+INSERT INTO komerizo_tesoreria_saldo (saldo_actual, saldo_anterior)
+VALUES (0, 0)
 ON CONFLICT DO NOTHING;
