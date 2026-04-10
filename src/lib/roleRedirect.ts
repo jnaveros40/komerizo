@@ -18,11 +18,11 @@ export function getRedirectUrlByRole(roles: Array<{ id: number; nombre: string }
     'Fiscal': '/fiscal',
     'Comisión de Convivencia y Conciliación': '/comision-convivencia',
     'Delegados a Asojuntas': '/delegados-asojuntas',
-    'Coordinadores de Comisiones de Trabajo': '/coordinadores-comisiones-trabajo',
+    'Coordinadores de Comisiones de Trabajo': '/coordinador-comision-trabajo',
     'Vocal': '/vocal',
     'Junta Directiva': '/junta-directiva',
+    'Coordinador Comisión Empresarial': '/coordinador-comision-empresarial',
     'Usuario': '/usuario',
-    'Coordinador Comisión Empresarial': '/usuario',
     'Miembro': '/usuario',
   }
 

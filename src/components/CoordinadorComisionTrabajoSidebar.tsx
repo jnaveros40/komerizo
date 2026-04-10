@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { getRedirectUrlByRole } from '@/lib/roleRedirect'
 import { supabase } from '@/lib/supabase'
-import './CoordinadoresComisionesSidebar.css'
+import './CoordinadorComisionTrabajoSidebar.css'
 
 export default function CoordinadoresComisionesSidebar({ user }: { user: any }) {
   const pathname = usePathname()
