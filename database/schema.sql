@@ -78,9 +78,29 @@ CREATE INDEX IF NOT EXISTS idx_usuarios_correo ON komerizo_usuarios(correo_elect
 CREATE INDEX IF NOT EXISTS idx_usuario_roles_usuario_id ON komerizo_usuario_roles(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_usuario_roles_rol_id ON komerizo_usuario_roles(rol_id);
 
+-- Crear tabla de solicitudes de informes
+CREATE TABLE IF NOT EXISTS komerizo_solicitud_informes (
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  usuario_id BIGINT NOT NULL REFERENCES komerizo_usuarios(id) ON DELETE CASCADE,
+  destinatario_rol_id BIGINT NOT NULL REFERENCES komerizo_roles(id) ON DELETE CASCADE,
+  estado VARCHAR(50) NOT NULL DEFAULT 'Pendiente', -- Pendiente, Respondido
+  mensaje_solicitud TEXT NOT NULL,
+  mensaje_respuesta TEXT,
+  fecha_solicitud TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  fecha_respuesta TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Crear índices para solicitud_informes
+CREATE INDEX IF NOT EXISTS idx_solicitud_usuario_id ON komerizo_solicitud_informes(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_solicitud_destinatario_rol_id ON komerizo_solicitud_informes(destinatario_rol_id);
+CREATE INDEX IF NOT EXISTS idx_solicitud_estado ON komerizo_solicitud_informes(estado);
+
 -- Habilitar RLS (Row Level Security) si es necesario
 ALTER TABLE komerizo_usuarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE komerizo_usuario_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE komerizo_solicitud_informes ENABLE ROW LEVEL SECURITY;
 
 -- Crear políticas RLS básicas (opcional, ajusta según tus necesidades)
 CREATE POLICY "public_read_usuarios" ON komerizo_usuarios
