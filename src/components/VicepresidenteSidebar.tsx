@@ -32,6 +32,11 @@ export default function VicepresidenteSidebar({ user }: { user: any }) {
       icon: '📅',
     },
     {
+      label: 'Informes',
+      href: '/vicepresidente/informes',
+      icon: '📄',
+    },
+    {
       label: 'Miembros',
       href: '/vicepresidente/miembros',
       icon: '👥',

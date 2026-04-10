@@ -32,6 +32,11 @@ export default function FiscalSidebar({ user }: { user: any }) {
       icon: '📅',
     },
     {
+      label: 'Informes',
+      href: '/fiscal/informes',
+      icon: '📄',
+    },
+    {
       label: 'Auditoría',
       href: '/fiscal/auditoria',
       icon: '🔍',

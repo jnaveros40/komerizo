@@ -32,6 +32,11 @@ export default function TesoreroSidebar({ user }: { user: any }) {
       icon: '📅',
     },
     {
+      label: 'Informes',
+      href: '/tesorero/informes',
+      icon: '📄',
+    },
+    {
       label: 'Finanzas',
       href: '/tesorero/finanzas',
       icon: '💰',
