@@ -23,12 +23,31 @@ interface Alquiler {
   estado: string;
 }
 
+interface InventarioItem {
+  id: number;
+  nombre: string;
+  cantidad: number;
+  valor_alquiler: number;
+  es_alquilable: boolean;
+}
+
+interface ItemAlquilerSeleccionado {
+  inventario_id: number;
+  nombre: string;
+  cantidad_alquilada: number;
+  valor_unitario: number;
+  cantidad_disponible: number;
+}
+
 export default function UsuarioSalonPage() {
   const [config, setConfig] = useState<SalonConfig | null>(null);
   const [reservas, setReservas] = useState<Alquiler[]>([]);
   const [loading, setLoading] = useState(true);
   const [usuario, setUsuario] = useState<any>(null);
   const [userRole, setUserRole] = useState<any>(null);
+  const [inventario, setInventario] = useState<InventarioItem[]>([]);
+  const [itemsSeleccionados, setItemsSeleccionados] = useState<ItemAlquilerSeleccionado[]>([]);
+  const [precioItems, setPrecioItems] = useState(0);
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -135,6 +154,19 @@ export default function UsuarioSalonPage() {
       if (reservasData) {
         setReservas(reservasData);
       }
+
+      // Cargar inventario alquilable
+      const { data: inventarioData } = await supabase
+        .from('komerizo_inventario')
+        .select('*')
+        .eq('es_alquilable', true)
+        .eq('estado', 'activo')
+        .gt('cantidad', 0)
+        .order('nombre', { ascending: true });
+
+      if (inventarioData) {
+        setInventario(inventarioData);
+      }
     } catch (error) {
       console.error('Error cargando datos:', error);
     } finally {
@@ -203,23 +235,48 @@ export default function UsuarioSalonPage() {
         return;
       }
 
-      const { error } = await supabase.from('komerizo_alquileres').insert([
-        {
-          usuario_id: usuario.id,
-          rol_id: userRole?.id,
-          fecha_inicio: formReserva.fecha_inicio,
-          fecha_fin: formReserva.fecha_fin,
-          hora_inicio: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_inicio : config.hora_apertura,
-          hora_fin: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_fin : config.hora_cierre,
-          tipo_alquiler: formReserva.tipo_alquiler,
-          cantidad: formReserva.cantidad,
-          valor_total: precioEstimado,
-          motivo: formReserva.motivo,
-          estado: 'confirmado',
-        },
-      ]);
+      // Calcular total: salón + items
+      const precioTotal = precioEstimado + precioItems;
 
-      if (error) throw error;
+      const { data: alquilerData, error: errorAlquiler } = await supabase
+        .from('komerizo_alquileres')
+        .insert([
+          {
+            usuario_id: usuario.id,
+            rol_id: userRole?.id,
+            fecha_inicio: formReserva.fecha_inicio,
+            fecha_fin: formReserva.fecha_fin,
+            hora_inicio: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_inicio : config.hora_apertura,
+            hora_fin: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_fin : config.hora_cierre,
+            tipo_alquiler: formReserva.tipo_alquiler,
+            cantidad: formReserva.cantidad,
+            valor_total: precioTotal,
+            motivo: formReserva.motivo,
+            estado: 'confirmado',
+          },
+        ])
+        .select();
+
+      if (errorAlquiler) throw errorAlquiler;
+
+      // Guardar items seleccionados
+      if (alquilerData && alquilerData.length > 0 && itemsSeleccionados.length > 0) {
+        const alquilerId = alquilerData[0].id;
+
+        const itemsParaGuardar = itemsSeleccionados.map((item) => ({
+          alquiler_id: alquilerId,
+          inventario_id: item.inventario_id,
+          cantidad_alquilada: item.cantidad_alquilada,
+          valor_unitario: item.valor_unitario,
+          valor_total: item.cantidad_alquilada * item.valor_unitario,
+        }));
+
+        const { error: errorItems } = await supabase
+          .from('komerizo_alquiler_items')
+          .insert(itemsParaGuardar);
+
+        if (errorItems) throw errorItems;
+      }
 
       alert('Reserva creada exitosamente');
       setShowFormReserva(false);
@@ -232,6 +289,7 @@ export default function UsuarioSalonPage() {
         hora_fin: '09:00',
         motivo: '',
       });
+      setItemsSeleccionados([]);
       await loadData();
     } catch (error) {
       console.error('Error creando reserva:', error);
@@ -260,6 +318,55 @@ export default function UsuarioSalonPage() {
     }
     return horas;
   };
+
+  // Agregar item al carrito de items
+  const agregarItem = (inventarioId: number) => {
+    const item = inventario.find((i) => i.id === inventarioId);
+    if (!item) return;
+
+    // Verificar si ya está en la lista
+    const yaExiste = itemsSeleccionados.find((i) => i.inventario_id === inventarioId);
+    if (yaExiste) {
+      alert('Este item ya está agregado');
+      return;
+    }
+
+    const nuevoItem: ItemAlquilerSeleccionado = {
+      inventario_id: inventarioId,
+      nombre: item.nombre,
+      cantidad_alquilada: 1,
+      valor_unitario: item.valor_alquiler,
+      cantidad_disponible: item.cantidad,
+    };
+
+    setItemsSeleccionados([...itemsSeleccionados, nuevoItem]);
+  };
+
+  // Eliminar item del carrito
+  const eliminarItem = (inventarioId: number) => {
+    setItemsSeleccionados(itemsSeleccionados.filter((i) => i.inventario_id !== inventarioId));
+  };
+
+  // Actualizar cantidad de item en carrito
+  const actualizarCantidadItem = (inventarioId: number, nuevaCantidad: number) => {
+    if (nuevaCantidad <= 0 || nuevaCantidad > inventario.find((i) => i.id === inventarioId)?.cantidad!) return;
+    
+    setItemsSeleccionados(
+      itemsSeleccionados.map((i) =>
+        i.inventario_id === inventarioId
+          ? { ...i, cantidad_alquilada: nuevaCantidad }
+          : i
+      )
+    );
+  };
+
+  // Calcular total de items
+  useEffect(() => {
+    const total = itemsSeleccionados.reduce((sum, item) => {
+      return sum + item.cantidad_alquilada * item.valor_unitario;
+    }, 0);
+    setPrecioItems(total);
+  }, [itemsSeleccionados]);
 
   const isDateReserved = (date: Date) => {
     return reservas.some((r) => {
@@ -591,6 +698,128 @@ export default function UsuarioSalonPage() {
               />
             </div>
 
+            {/* SECCIÓN DE ITEMS DEL INVENTARIO */}
+            <div style={{ background: '#0f1419', padding: '1.5rem', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #3a4a5f' }}>
+              <h4 style={{ marginBottom: '1rem', color: '#a1aec6' }}>📦 Artículos Disponibles para Alquilar</h4>
+              
+              {inventario.length === 0 ? (
+                <p style={{ color: '#a1aec6', fontSize: '0.9rem' }}>No hay artículos disponibles para alquilar</p>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                  {inventario.map((item) => {
+                    const yaAgregado = itemsSeleccionados.some((i) => i.inventario_id === item.id);
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.75rem',
+                          background: '#1e2a3a',
+                          border: '1px solid #3a4a5f',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ color: '#fff', fontWeight: 'bold' }}>{item.nombre}</div>
+                          <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>
+                            Stock: {item.cantidad} | ${item.valor_alquiler}/unidad
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => agregarItem(item.id)}
+                          disabled={yaAgregado}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: yaAgregado ? '#555' : '#6c5ce7',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: yaAgregado ? 'not-allowed' : 'pointer',
+                            fontSize: '0.85rem',
+                          }}
+                        >
+                          {yaAgregado ? '✓ Agregado' : '➕ Agregar'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* ITEMS SELECCIONADOS */}
+              {itemsSeleccionados.length > 0 && (
+                <div>
+                  <h5 style={{ color: '#6c5ce7', marginBottom: '0.75rem', marginTop: '1rem' }}>Items Seleccionados:</h5>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+                    {itemsSeleccionados.map((item) => (
+                      <div
+                        key={item.inventario_id}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'auto 1fr auto auto auto',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          padding: '0.75rem',
+                          background: '#151d27',
+                          border: '1px solid #6c5ce7',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        <div style={{ color: '#a1aec6', minWidth: '120px' }}>{item.nombre}</div>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <label style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Cantidad:</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max={item.cantidad_disponible}
+                            value={item.cantidad_alquilada}
+                            onChange={(e) =>
+                              actualizarCantidadItem(item.inventario_id, parseInt(e.target.value))
+                            }
+                            style={{
+                              width: '60px',
+                              padding: '0.4rem',
+                              background: '#0f1419',
+                              color: '#fff',
+                              border: '1px solid #3a4a5f',
+                              borderRadius: '4px',
+                              textAlign: 'center',
+                            }}
+                          />
+                          <span style={{ color: '#a1aec6', fontSize: '0.85rem' }}>de {item.cantidad_disponible}</span>
+                        </div>
+                        
+                        <div style={{ textAlign: 'right', minWidth: '70px' }}>
+                          <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>${item.valor_unitario}</div>
+                          <div style={{ color: '#fff', fontWeight: 'bold' }}>${(item.cantidad_alquilada * item.valor_unitario).toFixed(2)}</div>
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={() => eliminarItem(item.inventario_id)}
+                          style={{
+                            padding: '0.4rem 0.8rem',
+                            background: '#c0392b',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* RESUMEN DE PRECIO */}
             <div style={{ background: '#0f1419', padding: '1.5rem', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #3a4a5f' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -615,6 +844,16 @@ export default function UsuarioSalonPage() {
                   ${formReserva.tipo_alquiler === 'por_hora' ? config.valor_por_hora : config.valor_por_dia}
                 </span>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ color: '#a1aec6' }}>Subtotal Salón:</span>
+                <span style={{ color: '#fff' }}>${precioEstimado.toFixed(2)}</span>
+              </div>
+              {precioItems > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ color: '#a1aec6' }}>Subtotal Items:</span>
+                  <span style={{ color: '#fff' }}>${precioItems.toFixed(2)}</span>
+                </div>
+              )}
               <div
                 style={{
                   display: 'flex',
@@ -625,7 +864,7 @@ export default function UsuarioSalonPage() {
                 }}
               >
                 <span style={{ color: '#6c5ce7', fontWeight: 'bold' }}>TOTAL:</span>
-                <span style={{ color: '#6c5ce7', fontSize: '1.2rem', fontWeight: 'bold' }}>${precioEstimado.toFixed(2)}</span>
+                <span style={{ color: '#6c5ce7', fontSize: '1.2rem', fontWeight: 'bold' }}>${(precioEstimado + precioItems).toFixed(2)}</span>
               </div>
             </div>
 
