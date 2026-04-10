@@ -27,6 +27,11 @@ export default function CoordinadorComisionEmpresarialSidebar({ user }: { user: 
       icon: '📋',
     },
     {
+      label: 'Reuniones',
+      href: '/coordinador-comision-empresarial/reuniones',
+      icon: '📅',
+    },
+    {
       label: 'Emprendimientos',
       href: '/coordinador-comision-empresarial/emprendimientos',
       icon: '🚀',

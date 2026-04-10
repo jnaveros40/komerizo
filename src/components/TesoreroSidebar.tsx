@@ -27,6 +27,11 @@ export default function TesoreroSidebar({ user }: { user: any }) {
       icon: '📋',
     },
     {
+      label: 'Reuniones',
+      href: '/tesorero/reuniones',
+      icon: '📅',
+    },
+    {
       label: 'Finanzas',
       href: '/tesorero/finanzas',
       icon: '💰',

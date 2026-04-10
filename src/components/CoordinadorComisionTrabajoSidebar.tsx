@@ -27,6 +27,11 @@ export default function CoordinadoresComisionesSidebar({ user }: { user: any }) 
       icon: '📋',
     },
     {
+      label: 'Reuniones',
+      href: '/coordinador-comision-trabajo/reuniones',
+      icon: '📅',
+    },
+    {
       label: 'Comisiones',
       href: '/coordinador-comision-trabajo/comisiones',
       icon: '📋',

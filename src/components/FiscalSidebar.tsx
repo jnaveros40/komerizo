@@ -27,6 +27,11 @@ export default function FiscalSidebar({ user }: { user: any }) {
       icon: '📋',
     },
     {
+      label: 'Reuniones',
+      href: '/fiscal/reuniones',
+      icon: '📅',
+    },
+    {
       label: 'Auditoría',
       href: '/fiscal/auditoria',
       icon: '🔍',

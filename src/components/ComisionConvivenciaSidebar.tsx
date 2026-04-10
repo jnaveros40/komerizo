@@ -27,6 +27,11 @@ export default function ComisionConvivenciaSidebar({ user }: { user: any }) {
       icon: '📋',
     },
     {
+      label: 'Reuniones',
+      href: '/comision-convivencia/reuniones',
+      icon: '📅',
+    },
+    {
       label: 'Reportes',
       href: '/comision-convivencia/reportes',
       icon: '📋',

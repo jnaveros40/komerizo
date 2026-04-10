@@ -27,6 +27,11 @@ export default function JuntaDirectivaSidebar({ user }: { user: any }) {
       icon: '📋',
     },
     {
+      label: 'Reuniones',
+      href: '/junta-directiva/reuniones',
+      icon: '📅',
+    },
+    {
       label: 'Miembros',
       href: '/junta-directiva/miembros',
       icon: '👥',
