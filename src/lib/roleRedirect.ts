@@ -13,10 +13,16 @@ export function getRedirectUrlByRole(roles: Array<{ id: number; nombre: string }
     'Administrador': '/administrador',
     'Secretario': '/secretario',
     'Usuario': '/usuario',
-    'Junta Directiva': '/usuario',
+    'Presidente': '/usuario',
+    'Vicepresidente': '/usuario',
     'Tesorero': '/usuario',
+    'Fiscal': '/usuario',
+    'Junta Directiva': '/usuario',
     'Vocal': '/usuario',
-    'Coordinador': '/usuario',
+    'Comisión de Convivencia y Conciliación': '/usuario',
+    'Delegados a Asojuntas': '/usuario',
+    'Coordinadores de Comisiones de Trabajo': '/usuario',
+    'Coordinador Comisión Empresarial': '/usuario',
     'Miembro': '/usuario',
   }
 

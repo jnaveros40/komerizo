@@ -1,0 +1,69 @@
+Falta por implementar
+Rol Afiliado.
+- Solicitar informes a los dignatarios.
+- Ver las actas de las asambleas, directiva, comisiones de trabajo (a la queesta asignado), estatutos, reglamentos de los organismos o demás informes de gestión cargados por los dignatarios.
+- Ver a los afiliados registrados y su estado.
+- Solicitar cambio de comisión de trabajo.
+- Actualizar sus datos personales.
+- Solicitar su desafiliación ante secretaría, escala a comisión de convivencia y conciliación o presidente.
+- Descargar certificado de condición activa o inactiva en la junta directiva. (firmado por secretario y presidente)
+
+Rol presidente
+- Responder a solicitud de informe del afiliado.
+- Cargar informe sobre las gestiones realizadas en la asociación.
+- Convocar reunión de asamblea general o Junta Directiva. (Aviso)
+
+Rol Vicepresidente
+- Responder a solicitud de informe del afiliado.
+- Convocar reunión de Coordinadores de Comisiones de trabajo.
+- Crear acta (Permite adjuntar archivos)
+- Solicitar y recibir informes de los Coordinadores.
+
+Rol Tesorero
+- Responder a solicitud de informe del afiliado.
+- Gestionar inventario.
+- Gestionar uso de salón comunal.
+- Registrar ingresos.
+- Generar informe de movimientos (Obligatorios: bimestral y cada 4 meses).
+
+Rol Secretario
+- Responder a solicitud de informe del afiliado.
+- Registrar y actualizar el libro de afiliados.
+- Generar informe de afiliados suspendidos, sancionados y desafiliados.
+- Cambiar la comisión de trabajo de un afiliado.
+
+Rol Fiscal
+- Responder a solicitud de informe del afiliado.
+
+Rol Comisión de Convivencia y Conciliación
+- Responder a solicitud de informe del afiliado.
+- Desafiliar afiliados y marcarlos como suspendidos o sancionados.
+
+Rol Delegados a Asojuntas
+- Responder a solicitud de informe del afiliado.
+- Cargar informe sobre las gestiones realizadas en la asociación. 
+
+Rol Coordinadores de Comisiones de Trabajo
+- Responder a solicitud de informe del afiliado.
+- Subir reglamento a la junta directiva.
+
+Rol Coordinador Comisión Empresarial
+- Responder a solicitud de informe del afiliado (adjuntar archivos).
+- Subir reglamento.
+
+
+
+
+Datos:
+1- El aspirante acepta las cláusulas y condiciones establecidas, además del tratamiento de datos y la información verídica.
+2- Si es el caso, cargar autorización de la junta de retiro en donde se certifica que el afiliado ya no hace parte de la junta y tampoco presenta sanciones.(opcional)
+3- Número de orden (automático)
+4- Fecha de solicitud (automático)
+5- Nombres y apellidos completos del afiliado.
+6- Edad del afiliado.
+7- Tipo de documento.
+8- Número de documento de identificación. Si es extranjero, deberá subir su documento de identidad.
+9- Dirección
+10- Celular
+11- Comisión de trabajo en la que desea participar (Incluir una breve descripción de las actividades que realiza cada comisión al seleccionarla)
+12- Confirmar el registro o en su defecto, escalar a comisión de Convivencia y Conciliación con su debida justificación.

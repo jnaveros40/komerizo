@@ -28,14 +28,43 @@ export async function insertarDatosIniciales() {
       .from('komerizo_roles')
       .insert([
         {
+          nombre: 'Administrador',
+          descripcion: 'Administrador del sistema',
+        },
+        { nombre: 'Secretario', descripcion: 'Responsable de actas' },
+        {
+          nombre: 'Presidente',
+          descripcion: 'Presidente de la JAC',
+        },
+        {
+          nombre: 'Vicepresidente',
+          descripcion: 'Vicepresidente de la JAC',
+        },
+        { nombre: 'Tesorero', descripcion: 'Responsable de finanzas' },
+        { nombre: 'Fiscal', descripcion: 'Fiscal de la JAC' },
+        {
           nombre: 'Junta Directiva',
           descripcion: 'Miembro de la junta directiva',
         },
-        { nombre: 'Tesorero', descripcion: 'Responsable de finanzas' },
-        { nombre: 'Secretario', descripcion: 'Responsable de actas' },
         { nombre: 'Vocal', descripcion: 'Vocal de la JAC' },
-        { nombre: 'Administrador', descripcion: 'Administrador del sistema' },
+        {
+          nombre: 'Comisión de Convivencia y Conciliación',
+          descripcion: 'Encargada de convivencia y resolución de conflictos',
+        },
+        {
+          nombre: 'Delegados a Asojuntas',
+          descripcion: 'Delegados a la asociación de juntas directivas',
+        },
+        {
+          nombre: 'Coordinadores de Comisiones de Trabajo',
+          descripcion: 'Coordinador de comisiones de trabajo',
+        },
+        {
+          nombre: 'Coordinador Comisión Empresarial',
+          descripcion: 'Coordinador de la comisión empresarial',
+        },
         { nombre: 'Miembro', descripcion: 'Miembro regular de la JAC' },
+        { nombre: 'Usuario', descripcion: 'Usuario del sistema' },
       ])
       .select()
 

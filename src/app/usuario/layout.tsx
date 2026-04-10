@@ -55,7 +55,13 @@ export default function UsuarioLayout({
   return (
     <div className="page-wrapper">
       <div className="usuario-layout">
-        {user && <UsuarioSidebar user={user} />}
+        {user && (
+          <>
+            <UsuarioSidebar user={user} />
+            {/* DEBUG: Confirmar que se está renderizando UsuarioSidebar */}
+            <div style={{ display: 'none' }}>UsuarioSidebar_Rendered</div>
+          </>
+        )}
         <main className="usuario-main">{children}</main>
       </div>
       <Footer />

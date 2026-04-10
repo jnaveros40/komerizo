@@ -255,9 +255,24 @@
   color: #93c5fd;
 }
 
+.role-badge.presidente {
+  background: rgba(79, 70, 229, 0.2);
+  color: #a5b4fc;
+}
+
+.role-badge.vicepresidente {
+  background: rgba(59, 130, 246, 0.2);
+  color: #bfdbfe;
+}
+
 .role-badge.tesorero {
   background: rgba(34, 197, 94, 0.2);
   color: #86efac;
+}
+
+.role-badge.fiscal {
+  background: rgba(251, 146, 60, 0.2);
+  color: #fed7aa;
 }
 
 .role-badge.vocal {
@@ -278,6 +293,26 @@
 .role-badge.junta-directiva {
   background: rgba(236, 72, 153, 0.2);
   color: #f472b6;
+}
+
+.role-badge.comision-de-convivencia-y-conciliacion {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fcd34d;
+}
+
+.role-badge.delegados-a-asojuntas {
+  background: rgba(20, 83, 45, 0.2);
+  color: #86efac;
+}
+
+.role-badge.coordinadores-de-comisiones-de-trabajo {
+  background: rgba(13, 148, 136, 0.2);
+  color: #99f6e4;
+}
+
+.role-badge.coordinador-comision-empresarial {
+  background: rgba(126, 34, 206, 0.2);
+  color: #d8b4fe;
 }
 
 .role-badge.usuario {
