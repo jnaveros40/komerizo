@@ -49,6 +49,12 @@ export default function UsuarioSalonPage() {
     return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  // Parsear fecha string "YYYY-MM-DD" a Date local sin desfase
+  const parseLocalDate = (fechaString: string): Date => {
+    const [year, month, day] = fechaString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const [showFormReserva, setShowFormReserva] = useState(false);
   const [formReserva, setFormReserva] = useState({
     tipo_alquiler: 'por_hora' as 'por_hora' | 'por_dia',
@@ -136,6 +142,14 @@ export default function UsuarioSalonPage() {
     }
   };
 
+  // Debug: Log reservas when loaded
+  useEffect(() => {
+    console.log('Reservas cargadas del servidor:', reservas);
+    if (reservas.length > 0) {
+      console.log('Primera reserva:', reservas[0]);
+    }
+  }, [reservas]);
+
   // Sincronizar fecha seleccionada del calendario con el formulario
   useEffect(() => {
     if (selectedDate) {
@@ -170,12 +184,12 @@ export default function UsuarioSalonPage() {
     if (!config) return;
 
     try {
-      // Validar disponibilidad
+      // Validar disponibilidad usando parseLocalDate para mantener consistencia de timezone
       const reservasEnFecha = reservas.filter((r) => {
-        const rStart = new Date(r.fecha_inicio);
-        const rEnd = new Date(r.fecha_fin);
-        const formStart = new Date(formReserva.fecha_inicio);
-        const formEnd = new Date(formReserva.fecha_fin);
+        const rStart = parseLocalDate(r.fecha_inicio);
+        const rEnd = parseLocalDate(r.fecha_fin);
+        const formStart = parseLocalDate(formReserva.fecha_inicio);
+        const formEnd = parseLocalDate(formReserva.fecha_fin);
 
         return (
           (formStart >= rStart && formStart <= rEnd) ||
@@ -233,11 +247,32 @@ export default function UsuarioSalonPage() {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
+  // Generar array de horas disponibles
+  const generarHorasDisponibles = () => {
+    if (!config) return [];
+    
+    const [aperturaH, aperturaM] = config.hora_apertura.split(':').map(Number);
+    const [cierreH, cierreM] = config.hora_cierre.split(':').map(Number);
+    
+    const horas = [];
+    for (let h = aperturaH; h <= cierreH; h++) {
+      horas.push(String(h).padStart(2, '0'));
+    }
+    return horas;
+  };
+
   const isDateReserved = (date: Date) => {
     return reservas.some((r) => {
-      const rStart = new Date(r.fecha_inicio);
-      const rEnd = new Date(r.fecha_fin);
-      return date >= rStart && date <= rEnd;
+      const rStart = parseLocalDate(r.fecha_inicio);
+      const rEnd = parseLocalDate(r.fecha_fin);
+      
+      // Comparar solo fecha, sin hora
+      const dateToCompare = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      
+      console.log('Checking date:', dateToCompare, 'Against reservation:', r.fecha_inicio, 'to', r.fecha_fin, 'Parsed:', rStart, 'to', rEnd);
+      const isReserved = dateToCompare >= rStart && dateToCompare <= rEnd;
+      if (isReserved) console.log('DATE IS RESERVED');
+      return isReserved;
     });
   };
 
@@ -473,10 +508,12 @@ export default function UsuarioSalonPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>Hora de Inicio:</label>
-                  <input
-                    type="time"
+                  <select
                     value={formReserva.hora_inicio}
-                    onChange={(e) => setFormReserva({ ...formReserva, hora_inicio: e.target.value })}
+                    onChange={(e) => {
+                      const newHoraInicio = e.target.value + ':00';
+                      setFormReserva({ ...formReserva, hora_inicio: newHoraInicio });
+                    }}
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -486,14 +523,30 @@ export default function UsuarioSalonPage() {
                       borderRadius: '4px',
                     }}
                     required
-                  />
+                  >
+                    <option value="">Selecciona hora de inicio</option>
+                    {generarHorasDisponibles().map((hora) => {
+                      const horaCompleta = `${hora}:00`;
+                      // Si hay hora de fin, evitar que hora inicio sea >= hora fin
+                      if (formReserva.hora_fin && horaCompleta >= formReserva.hora_fin) {
+                        return null;
+                      }
+                      return (
+                        <option key={hora} value={horaCompleta}>
+                          {hora}:00
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>Hora de Fin:</label>
-                  <input
-                    type="time"
+                  <select
                     value={formReserva.hora_fin}
-                    onChange={(e) => setFormReserva({ ...formReserva, hora_fin: e.target.value })}
+                    onChange={(e) => {
+                      const newHoraFin = e.target.value + ':00';
+                      setFormReserva({ ...formReserva, hora_fin: newHoraFin });
+                    }}
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -503,7 +556,21 @@ export default function UsuarioSalonPage() {
                       borderRadius: '4px',
                     }}
                     required
-                  />
+                  >
+                    <option value="">Selecciona hora de fin</option>
+                    {generarHorasDisponibles().map((hora) => {
+                      const horaCompleta = `${hora}:00`;
+                      // Solo mostrar horas después de la hora de inicio
+                      if (formReserva.hora_inicio && horaCompleta <= formReserva.hora_inicio) {
+                        return null;
+                      }
+                      return (
+                        <option key={hora} value={horaCompleta}>
+                          {hora}:00
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
               </div>
             )}
