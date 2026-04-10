@@ -144,7 +144,7 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label htmlFor="identifier">📧 CC o Correo Electrónico</label>
+            <label htmlFor="identifier">📧 CC</label>
             <input
               id="identifier"
               type="text"
@@ -178,12 +178,12 @@ export default function Login() {
             disabled={loading}
             className="login-button"
           >
-            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            {loading ? '⏳ Iniciando sesión...' : '✨ Iniciar Sesión'}
           </button>
         </form>
 
         <p className="login-footer">
-          ¿No tienes cuenta? Contacta al administrador de la JAC
+          ℹ️ ¿No tienes cuenta? Contacta al administrador de la JAC
         </p>
       </div>
       <Footer />
