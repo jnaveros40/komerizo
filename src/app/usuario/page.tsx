@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import './usuario.css'
@@ -24,6 +25,7 @@ type Directiva = {
 
 export default function UsuarioDashboardPage() {
   const { user } = useAuth()
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [comunaName, setComunaName] = useState('')
   const [barrioName, setBarrioName] = useState('')
@@ -93,7 +95,10 @@ export default function UsuarioDashboardPage() {
 
       {/* Sección de estadísticas */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <div 
+          className="stat-card clickable"
+          onClick={() => router.push('/usuario/perfil')}
+        >
           <div className="stat-icon">📋</div>
           <div className="stat-content">
             <p className="stat-label">Información Personal</p>
