@@ -511,8 +511,7 @@ export default function UsuarioSalonPage() {
                   <select
                     value={formReserva.hora_inicio}
                     onChange={(e) => {
-                      const newHoraInicio = e.target.value + ':00';
-                      setFormReserva({ ...formReserva, hora_inicio: newHoraInicio });
+                      setFormReserva({ ...formReserva, hora_inicio: e.target.value });
                     }}
                     style={{
                       width: '100%',
@@ -544,8 +543,7 @@ export default function UsuarioSalonPage() {
                   <select
                     value={formReserva.hora_fin}
                     onChange={(e) => {
-                      const newHoraFin = e.target.value + ':00';
-                      setFormReserva({ ...formReserva, hora_fin: newHoraFin });
+                      setFormReserva({ ...formReserva, hora_fin: e.target.value });
                     }}
                     style={{
                       width: '100%',
