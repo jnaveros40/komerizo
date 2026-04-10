@@ -1,0 +1,129 @@
+/* Tesorero Dashboard Styles */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.tesorero-layout {
+  display: flex;
+  flex: 1;
+ 
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #e2e8f0;
+}
+
+.tesorero-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tesorero-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.tesorero-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tesorero-header {
+  margin-bottom: 2rem;
+}
+
+.tesorero-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.header-subtitle {
+  color: #a1aec6;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Location Card */
+.location-card {
+  background: rgba(51, 65, 85, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+}
+
+.location-card h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #cbd5e1;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.location-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 0.5rem;
+  border-left: 3px solid #10b981;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #a1aec6;
+}
+
+.info-value {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  background: rgba(51, 65, 85, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  color: #a1aec6;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tesorero-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tesorero-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .tesorero-container {
+    padding: 1rem;
+  }
+
+  .location-info {
+    grid-template-columns: 1fr;
+  }
+}
