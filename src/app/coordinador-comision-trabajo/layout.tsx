@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import CoordinadoresComisionesSidebar from '@/components/CoordinadoresComisionesSidebar'
+import CoordinadoresComisionesSidebar from '@/components/CoordinadorComisionTrabajoSidebar'
 import Footer from '@/components/Footer'
 import './coordinadores-comisiones.css'
 
