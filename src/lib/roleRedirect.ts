@@ -19,9 +19,9 @@ export function getRedirectUrlByRole(roles: Array<{ id: number; nombre: string }
     'Comisión de Convivencia y Conciliación': '/comision-convivencia',
     'Delegados a Asojuntas': '/delegados-asojuntas',
     'Coordinadores de Comisiones de Trabajo': '/coordinadores-comisiones',
+    'Vocal': '/vocal',
     'Usuario': '/usuario',
     'Junta Directiva': '/usuario',
-    'Vocal': '/usuario',
     'Coordinador Comisión Empresarial': '/usuario',
     'Miembro': '/usuario',
   }
