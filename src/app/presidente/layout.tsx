@@ -33,13 +33,10 @@ export default function PresidenteLayout({
 
       console.log('👑 [presidente/layout] tieneRolPresidente:', tieneRolPresidente)
       if (!tieneRolPresidente) {
-        // Si NO tiene rol Presidente, redirigir a home para que se redirija según su rol principal
-        console.log('👑 [presidente/layout] User does not have Presidente role, redirecting to /')
         router.push('/')
         return
       }
 
-      console.log('👑 [presidente/layout] User authorized as Presidente')
       setIsAuthorized(true)
     }
   }, [user, loading, router])
@@ -53,12 +50,15 @@ export default function PresidenteLayout({
   }
 
   return (
-    <div className="presidente-layout">
-      <PresidenteSidebar />
-      <main className="presidente-main">
-        {children}
-      </main>
+    <div className="page-wrapper">
+      <div className="presidente-layout">
+        {user && <PresidenteSidebar user={user} />}
+        <main className="presidente-main">
+          <div className="presidente-content">{children}</div>
+        </main>
+      </div>
       <Footer />
     </div>
+
   )
 }
