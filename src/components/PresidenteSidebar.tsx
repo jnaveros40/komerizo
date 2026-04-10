@@ -27,6 +27,11 @@ export default function PresidenteSidebar({ user }: { user: any }) {
       icon: '📋',
     },
     {
+      label: 'Reuniones',
+      href: '/presidente/reuniones',
+      icon: '📅',
+    },
+    {
       label: 'Miembros',
       href: '/presidente/miembros',
       icon: '👥',

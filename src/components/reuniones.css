@@ -1,0 +1,562 @@
+.reuniones-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.reuniones-header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.reuniones-header h1 {
+  font-size: 2rem;
+  color: #e2e8f0;
+  margin: 0;
+  font-weight: 700;
+}
+
+.header-subtitle {
+  color: #a1aec6;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.btn-nueva-reunion {
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-nueva-reunion:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Filtros */
+.filtro-reuniones {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  background: #334155;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #475569;
+}
+
+.filtro-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filtro-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.filtro-select,
+.filtro-input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #1e293b;
+  color: #e2e8f0;
+  min-width: 150px;
+}
+
+.filtro-select:focus,
+.filtro-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.filtro-btn-reset {
+  padding: 0.6rem 1.2rem;
+  background: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.filtro-btn-reset:hover {
+  background: #d97706;
+}
+
+/* Loading y Empty States */
+.reuniones-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.reuniones-loading p {
+  font-size: 1.1rem;
+  color: #a1aec6;
+}
+
+.no-reuniones {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: #334155;
+  border-radius: 8px;
+}
+
+.no-reuniones p {
+  color: #a1aec6;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Lista de reuniones */
+.reuniones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.reunion-card {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.reunion-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: #3b82f6;
+}
+
+.reunion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.reunion-titulo {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.reunion-tipo {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background: rgba(139, 92, 246, 0.3);
+  color: #c4b5fd;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.estado-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-badge.pendiente {
+  background: #FFF3CD;
+  color: #856404;
+}
+
+.estado-badge.confirmada {
+  background: #D4EDDA;
+  color: #155724;
+}
+
+.estado-badge.realizada {
+  background: #D1ECF1;
+  color: #0c5460;
+}
+
+.estado-badge.cancelada {
+  background: #F8D7DA;
+  color: #721c24;
+}
+
+/* Meta información */
+.reunion-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-icon {
+  color: #60a5fa;
+}
+
+.reunion-descripcion {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #0f172a;
+  border-left: 4px solid #3b82f6;
+  color: #cbd5e1;
+  border-radius: 4px;
+  line-height: 1.6;
+}
+
+.reunion-lugar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  color: #a1aec6;
+  font-size: 0.95rem;
+}
+
+/* Información de roles y participantes */
+.reunion-roles {
+  margin: 1rem 0;
+}
+
+.roles-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.roles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.role-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Confirmaciones */
+.reunion-confirmaciones {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #475569;
+}
+
+.confirmaciones-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.confirmacion-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.confirmacion-estado {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.confirmacion-estado.confirmado {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+.confirmacion-estado.rechazado {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.confirmacion-estado.sin_responder {
+  background: rgba(120, 113, 108, 0.2);
+  color: #d1d5db;
+}
+
+/* Acciones */
+.reunion-acciones {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #475569;
+}
+
+.btn-reunion {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-editar {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-editar:hover {
+  background: #2563eb;
+}
+
+.btn-cancelar-reunion {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-cancelar-reunion:hover {
+  background: #dc2626;
+}
+
+.btn-confirmar {
+  background: #10b981;
+  color: white;
+}
+
+.btn-confirmar:hover {
+  background: #059669;
+}
+
+.btn-rechazar {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-rechazar:hover {
+  background: #4b5563;
+}
+
+/* Modal de nueva reunión */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 1.5rem;
+}
+
+.btn-cerrar {
+  background: none;
+  border: none;
+  color: #a1aec6;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.btn-cerrar:hover {
+  color: #e2e8f0;
+}
+
+/* Formulario */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  padding: 0.75rem;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-guardar {
+  flex: 1;
+  padding: 0.75rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-guardar:hover {
+  background: #059669;
+}
+
+.btn-cancelar-form {
+  flex: 1;
+  padding: 0.75rem;
+  background: #334155;
+  color: #cbd5e1;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancelar-form:hover {
+  background: #475569;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reuniones-container {
+    padding: 1rem;
+  }
+
+  .reuniones-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-nueva-reunion {
+    width: 100%;
+    text-align: center;
+  }
+
+  .filtro-reuniones {
+    flex-direction: column;
+  }
+
+  .filtro-group,
+  .filtro-select,
+  .filtro-input,
+  .filtro-btn-reset {
+    width: 100%;
+  }
+
+  .filtro-select,
+  .filtro-input,
+  .filtro-btn-reset {
+    min-width: unset;
+  }
+
+  .reunion-header {
+    flex-direction: column;
+  }
+
+  .reunion-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .reunion-acciones {
+    flex-direction: column;
+  }
+
+  .btn-reunion {
+    width: 100%;
+  }
+
+  .modal-content {
+    width: 95%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
