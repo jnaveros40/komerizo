@@ -2,18 +2,52 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import '@/components/reuniones.css';
 
-// Tipado para jsPDF autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: any;
-    lastAutoTable: any;
-  }
-}
+// Función para dibujar tablas manualmente en jsPDF
+const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], primaryColor: number[]) => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const cellWidth = (pageWidth - 2 * margin) / headers.length;
+  const cellHeight = 10;
+  let yPos = startY;
+
+  // Dibujar encabezados
+  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(undefined, 'bold');
+  
+  headers.forEach((header, i) => {
+    doc.rect(margin + i * cellWidth, yPos, cellWidth, cellHeight, 'F');
+    doc.text(header, margin + i * cellWidth + 2, yPos + 7, { maxWidth: cellWidth - 4 });
+  });
+
+  yPos += cellHeight;
+
+  // Dibujar filas
+  doc.setTextColor(0, 0, 0);
+  doc.setFont(undefined, 'normal');
+  
+  rows.forEach((row: any[], rowIndex: number) => {
+    // Validar si necesitamos nueva página
+    if (yPos + cellHeight > pageHeight - 20) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    row.forEach((cell: any, colIndex: number) => {
+      doc.rect(margin + colIndex * cellWidth, yPos, cellWidth, cellHeight);
+      doc.text(String(cell), margin + colIndex * cellWidth + 2, yPos + 7, { maxWidth: cellWidth - 4 });
+    });
+    
+    yPos += cellHeight;
+  });
+
+  return yPos + 10;
+};
 
 interface InventarioItem {
   id: number;
@@ -66,6 +100,11 @@ export default function TesoreroInventarioPage() {
   const [reportes, setReportes] = useState<Reporte[]>([]);
   const [loading, setLoading] = useState(true);
   const [usuario, setUsuario] = useState<any>(null);
+
+  // Cargar plugin autoTable cuando el componente monta
+  useEffect(() => {
+    // Plugin ya no es necesario - usamos función manual
+  }, []);
 
   const [showFormNuevo, setShowFormNuevo] = useState(false);
   const [itemEditando, setItemEditando] = useState<InventarioItem | null>(null);
@@ -287,6 +326,10 @@ export default function TesoreroInventarioPage() {
   // Descargar reporte como PDF
   const handleDescargarPDF = async (reporte: Reporte) => {
     try {
+      console.log('📥 Iniciando descarga de PDF...');
+      console.log('Inventario disponible:', inventario);
+      console.log('Reporte:', reporte);
+
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -294,6 +337,19 @@ export default function TesoreroInventarioPage() {
 
       // Color principal
       const primaryColor = [108, 92, 231]; // #6c5ce7
+
+      console.log('✅ jsPDF inicializado');
+      
+      // Verificar que autoTable está disponible
+      if (!(inventario && inventario.length > 0)) {
+        console.warn('⚠️ No hay inventario disponible');
+        doc.setFontSize(16);
+        doc.text('Reporte de Inventario', 20, 20);
+        doc.setFontSize(10);
+        doc.text('No hay datos de inventario para mostrar.', 20, 40);
+        doc.save(`Reporte_Inventario.pdf`);
+        return;
+      }
 
       // Título
       doc.setFontSize(20);
@@ -316,15 +372,68 @@ export default function TesoreroInventarioPage() {
       doc.text(`Estado: ${reporte.estado}`, 20, yPosition);
       yPosition += 15;
 
-      // Resumen de valores
-      doc.setFontSize(12);
-      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text('Resumen Financiero', 20, yPosition);
+      console.log('✅ Información general agregada');
 
-      yPosition += 8;
+      // ===== SECCIÓN 1: INVENTARIO ACTUAL =====
+      doc.setFontSize(14);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text('📦 Inventario Actual', 20, yPosition);
+      yPosition += 10;
+
+      console.log('📦 Creando tabla de inventario. Items:', inventario.length);
+
+      // Tabla de inventario
+      if (inventario && inventario.length > 0) {
+        const inventarioTableData = inventario.map((item) => [
+          item.nombre,
+          item.categoria,
+          `${item.cantidad} ${item.unidad}`,
+          `$${item.valor_unitario.toFixed(2)}`,
+          `$${(item.valor_total || 0).toFixed(2)}`,
+        ]);
+
+        console.log('Datos de tabla de inventario:', inventarioTableData);
+
+        yPosition = drawTable(
+          doc,
+          yPosition,
+          ['Nombre', 'Categoría', 'Cantidad', 'Valor Unit.', 'Valor Total'],
+          inventarioTableData,
+          primaryColor
+        );
+
+        console.log('✅ Tabla de inventario creada');
+
+        // Resumen de inventario
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        const totalInventario = inventario.reduce((sum, item) => sum + (item.valor_total || 0), 0);
+        doc.text(`Total Items: ${inventario.length}`, 20, yPosition);
+        yPosition += 7;
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.setFontSize(12);
+        doc.text(
+          `Valor Total: $${totalInventario.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          20,
+          yPosition
+        );
+        yPosition += 15;
+      } else {
+        console.warn('⚠️ No hay items en inventario');
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        doc.text('No hay items en inventario', 20, yPosition);
+        yPosition += 15;
+      }
+
+      // ===== SECCIÓN 2: RESUMEN FINANCIERO =====
+      doc.setFontSize(14);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text('💰 Resumen del Período', 20, yPosition);
+      yPosition += 10;
+
       doc.setFontSize(11);
       doc.setTextColor(0, 0, 0);
-
       doc.text(
         `Valor Total del Inventario: $${reporte.valor_final?.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         20,
@@ -335,48 +444,125 @@ export default function TesoreroInventarioPage() {
       doc.text(`Total de Cambios Registrados: ${reporte.total_cambios}`, 20, yPosition);
       yPosition += 15;
 
-      // Detalle de cambios
-      doc.setFontSize(12);
+      console.log('✅ Resumen financiero agregado');
+
+      // ===== SECCIÓN 3: DETALLE DE CAMBIOS =====
+      doc.setFontSize(14);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text('Cambios Registrados', 20, yPosition);
+      doc.text('📋 Detalle de Cambios Registrados', 20, yPosition);
+      yPosition += 10;
 
-      yPosition += 8;
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-
-      if (reporte.detalles) {
+      if ((reporte as any).detalles) {
         try {
-          const detalles = JSON.parse(reporte.detalles);
+          console.log('Detalles del reporte:', (reporte as any).detalles);
+          const detalles = JSON.parse((reporte as any).detalles);
           const cambios = detalles.cambios || [];
 
-          if (cambios.length > 0) {
-            // Crear tabla de cambios
-            const tableData = cambios.slice(0, 20).map((cambio: any) => [
-              new Date(cambio.fecha_cambio).toLocaleDateString('es-ES'),
-              cambio.tipo_cambio,
-              cambio.justificacion?.substring(0, 30) + '...',
-            ]);
+          console.log('Cambios parseados:', cambios.length);
 
-            doc.autoTable({
-              startY: yPosition,
-              head: [['Fecha', 'Tipo de Cambio', 'Justificación']],
-              body: tableData,
-              theme: 'grid',
-              headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
-              margin: { left: 20, right: 20 },
+          if (cambios.length > 0) {
+            // Crear tabla detallada de cambios
+            const tableData = cambios.map((cambio: any) => {
+              let detalle = '';
+
+              if (cambio.cantidad_anterior !== cambio.cantidad_nueva) {
+                detalle += `Cant: ${cambio.cantidad_anterior} → ${cambio.cantidad_nueva}\n`;
+              }
+
+              if (cambio.valor_unitario_anterior !== cambio.valor_unitario_nueva) {
+                detalle += `Valor: $${cambio.valor_unitario_anterior} → $${cambio.valor_unitario_nueva}\n`;
+              }
+
+              if (cambio.estado_anterior !== cambio.estado_nuevo) {
+                detalle += `Estado: ${cambio.estado_anterior} → ${cambio.estado_nuevo}`;
+              }
+
+              return [
+                new Date(cambio.fecha_cambio).toLocaleDateString('es-ES'),
+                cambio.tipo_cambio,
+                detalle || 'Creación inicial',
+                cambio.justificacion?.substring(0, 25) + (cambio.justificacion?.length > 25 ? '...' : ''),
+              ];
             });
 
-            yPosition = doc.lastAutoTable.finalY + 10;
+            console.log('Datos de tabla de cambios:', tableData);
+
+            yPosition = drawTable(
+              doc,
+              yPosition,
+              ['Fecha', 'Tipo', 'Cambios', 'Justificación'],
+              tableData,
+              primaryColor
+            );
+
+            console.log('✅ Tabla de cambios creada');
+
+            // Mostrar justificaciones completas si hay espacio
+            if (cambios.length <= 5) {
+              doc.setFontSize(10);
+              doc.setTextColor(0, 0, 0);
+
+              cambios.forEach((cambio: any, index: number) => {
+                // Agregar nueva página si es necesario
+                if (yPosition > pageHeight - 40) {
+                  console.log('📄 Agregando nueva página');
+                  doc.addPage();
+                  yPosition = 20;
+                }
+
+                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.setFontSize(10);
+                doc.text(`Cambio #${index + 1} - ${new Date(cambio.fecha_cambio).toLocaleDateString('es-ES')}`, 20, yPosition);
+                yPosition += 6;
+
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(9);
+
+                // Resumen de cambios
+                if (cambio.cantidad_anterior !== cambio.cantidad_nueva) {
+                  doc.text(`  • Cantidad: ${cambio.cantidad_anterior} → ${cambio.cantidad_nueva}`, 25, yPosition);
+                  yPosition += 5;
+                }
+
+                if (cambio.valor_unitario_anterior !== cambio.valor_unitario_nueva) {
+                  doc.text(`  • Valor Unitario: $${cambio.valor_unitario_anterior} → $${cambio.valor_unitario_nueva}`, 25, yPosition);
+                  yPosition += 5;
+                }
+
+                if (cambio.estado_anterior !== cambio.estado_nuevo) {
+                  doc.text(`  • Estado: ${cambio.estado_anterior} → ${cambio.estado_nuevo}`, 25, yPosition);
+                  yPosition += 5;
+                }
+
+                // Justificación
+                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.text('Justificación:', 25, yPosition);
+                yPosition += 4;
+
+                doc.setTextColor(0, 0, 0);
+                const splitJustificacion = doc.splitTextToSize(cambio.justificacion || '', 160);
+                doc.text(splitJustificacion, 28, yPosition);
+                yPosition += splitJustificacion.length * 4 + 8;
+              });
+            }
           } else {
+            console.warn('⚠️ No hay cambios en este período');
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
             doc.text('No hay cambios registrados en este período', 20, yPosition);
           }
         } catch (e) {
-          doc.text('No hay detalles disponibles', 20, yPosition);
+          console.error('❌ Error parseando detalles:', e);
+          doc.setFontSize(11);
+          doc.setTextColor(0, 0, 0);
+          doc.text('Error al cargar detalles de cambios', 20, yPosition);
         }
+      } else {
+        console.warn('⚠️ No hay detalles en el reporte');
       }
 
       // Pie de página
-      const totalPages = doc.internal.getNumberOfPages();
+      const totalPages = (doc as any).internal.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         doc.setFontSize(9);
@@ -389,14 +575,18 @@ export default function TesoreroInventarioPage() {
         );
       }
 
+      console.log('✅ PDF generado con', totalPages, 'páginas');
+
       // Descargar
       const nombreArchivo = `Reporte_Inventario_${reporte.tipo_reporte}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(nombreArchivo);
 
+      console.log('✅ PDF descargado:', nombreArchivo);
       alert('PDF descargado exitosamente');
     } catch (error) {
-      console.error('Error generando PDF:', error);
-      alert('Error al descargar el PDF');
+      console.error('❌ Error generando PDF:', error);
+      console.error('Stack trace:', (error as any)?.stack);
+      alert(`Error al descargar el PDF: ${(error as any)?.message || 'Error desconocido'}`);
     }
   };
 
