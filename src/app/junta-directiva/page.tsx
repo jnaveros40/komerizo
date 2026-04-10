@@ -7,30 +7,49 @@ import './junta-directiva.css'
 
 export default function JuntaDirectivaPage() {
   const { user } = useAuth()
-  const [comunaInfo, setComunaInfo] = useState<{ nombre: string; barrio: string } | null>(null)
+  const [comunaName, setComunaName] = useState('')
+  const [barrioName, setBarrioName] = useState('')
+  const [usuarioData, setUsuarioData] = useState<any>(null)
 
   useEffect(() => {
     if (user?.id) {
-      fetchComunaInfo()
+      fetchUserData()
     }
   }, [user?.id])
 
-  const fetchComunaInfo = async () => {
+  const fetchUserData = async () => {
     try {
-      const { data, error } = await supabase
+      // Obtener datos del usuario
+      const { data: userData, error: userError } = await supabase
         .from('komerizo_usuarios')
-        .select('comuna, barrio')
+        .select('*')
         .eq('id', user?.id)
         .single()
 
-      if (data) {
-        setComunaInfo({
-          nombre: data.comuna || 'No disponible',
-          barrio: data.barrio || 'No disponible',
-        })
+      if (userError) throw userError
+      setUsuarioData(userData)
+
+      // Obtener nombre de la comuna
+      if (userData?.comuna_id) {
+        const { data: comunaData } = await supabase
+          .from('komerizo_comunas')
+          .select('nombre')
+          .eq('id', userData.comuna_id)
+          .single()
+        setComunaName(comunaData?.nombre || 'No disponible')
+      }
+
+      // Obtener nombre del barrio
+      if (userData?.barrio_id) {
+        const { data: barrioData } = await supabase
+          .from('komerizo_barrios')
+          .select('nombre')
+          .eq('id', userData.barrio_id)
+          .single()
+        setBarrioName(barrioData?.nombre || 'No disponible')
       }
     } catch (error) {
-      console.error('Error fetching comuna info:', error)
+      console.error('Error fetching data:', error)
     }
   }
 
@@ -42,15 +61,15 @@ export default function JuntaDirectivaPage() {
       </div>
 
       <div className="junta-directiva-grid">
-        {comunaInfo && (
+        {usuarioData && (
           <div className="location-card">
             <div className="location-icon">
               <span>📍</span>
             </div>
             <div className="location-content">
               <p className="location-label">Tu Comuna</p>
-              <h3 className="location-name">{comunaInfo.nombre}</h3>
-              <p className="location-barrio">{comunaInfo.barrio}</p>
+              <h3 className="location-name">{comunaName}</h3>
+              <p className="location-barrio">{barrioName}</p>
             </div>
           </div>
         )}
