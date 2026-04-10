@@ -59,6 +59,8 @@ interface InventarioItem {
   valor_total: number;
   categoria: string;
   estado: string;
+  es_alquilable: boolean;
+  valor_alquiler: number;
   fecha_ingreso: string;
   fecha_actualizacion: string;
 }
@@ -117,6 +119,8 @@ export default function TesoreroInventarioPage() {
     unidad: 'unidades',
     valor_unitario: 0,
     categoria: '',
+    es_alquilable: false,
+    valor_alquiler: 0,
   });
 
   const [formEditar, setFormEditar] = useState({
@@ -197,6 +201,8 @@ export default function TesoreroInventarioPage() {
             unidad: formData.unidad,
             valor_unitario: formData.valor_unitario,
             categoria: formData.categoria,
+            es_alquilable: formData.es_alquilable,
+            valor_alquiler: formData.es_alquilable ? formData.valor_alquiler : 0,
             estado: 'activo',
           },
         ])
@@ -220,7 +226,7 @@ export default function TesoreroInventarioPage() {
       ]);
 
       alert('Item creado exitosamente');
-      setFormData({ nombre: '', descripcion: '', cantidad: 0, unidad: 'unidades', valor_unitario: 0, categoria: '' });
+      setFormData({ nombre: '', descripcion: '', cantidad: 0, unidad: 'unidades', valor_unitario: 0, categoria: '', es_alquilable: false, valor_alquiler: 0 });
       setShowFormNuevo(false);
       await loadData();
     } catch (error) {
@@ -785,6 +791,42 @@ export default function TesoreroInventarioPage() {
               </div>
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <input
+                  type="checkbox"
+                  checked={formData.es_alquilable}
+                  onChange={(e) => setFormData({ ...formData, es_alquilable: e.target.checked })}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    cursor: 'pointer',
+                  }}
+                />
+                <label style={{ color: '#a1aec6', cursor: 'pointer' }}>¿Es alquilable?</label>
+              </div>
+              {formData.es_alquilable && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1aec6' }}>Valor del Alquiler:</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.valor_alquiler}
+                    onChange={(e) => setFormData({ ...formData, valor_alquiler: parseFloat(e.target.value) })}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      background: '#0f1419',
+                      color: '#fff',
+                      border: '1px solid #3a4a5f',
+                      borderRadius: '4px',
+                    }}
+                    placeholder="Ej: 50000"
+                  />
+                </div>
+              )}
+            </div>
+
             <div style={{ display: 'flex', gap: '1rem' }}>
               <button type="submit" className="btn-reunion btn-editar" style={{ flex: 1 }}>
                 Crear Item
@@ -851,6 +893,11 @@ export default function TesoreroInventarioPage() {
                     <div className="meta-item">
                       <span className="meta-icon">🔢</span>${item.valor_total?.toFixed(2)}
                     </div>
+                    {item.es_alquilable && (
+                      <div className="meta-item">
+                        <span className="meta-icon">🏪</span>Alquiler: ${item.valor_alquiler}
+                      </div>
+                    )}
                   </div>
 
                   {item.descripcion && <div className="reunion-descripcion">{item.descripcion}</div>}
