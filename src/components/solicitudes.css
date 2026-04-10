@@ -10,13 +10,13 @@
 
 .solicitudes-header h1 {
   font-size: 2rem;
-  color: #1a1a1a;
+  color: #e2e8f0;
   margin: 0 0 0.5rem 0;
   font-weight: 700;
 }
 
 .header-subtitle {
-  color: #666;
+  color: #a1aec6;
   font-size: 1rem;
   margin: 0;
 }
@@ -27,10 +27,10 @@
   margin-bottom: 2rem;
   flex-wrap: wrap;
   align-items: flex-end;
-  background: #f9f9f9;
+  background: #334155;
   padding: 1rem;
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #475569;
 }
 
 .filtro-group {
@@ -42,30 +42,31 @@
 .filtro-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #333;
+  color: #e2e8f0;
 }
 
 .filtro-select,
 .filtro-input {
   padding: 0.6rem 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid #475569;
   border-radius: 6px;
   font-size: 0.95rem;
   font-family: inherit;
-  background: white;
+  background: #1e293b;
+  color: #e2e8f0;
   min-width: 150px;
 }
 
 .filtro-select:focus,
 .filtro-input:focus {
   outline: none;
-  border-color: #2196F3;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .filtro-btn-reset {
   padding: 0.6rem 1.2rem;
-  background: #ff9800;
+  background: #f59e0b;
   color: white;
   border: none;
   border-radius: 6px;
@@ -76,7 +77,8 @@
 }
 
 .filtro-btn-reset:hover {
-  background: #f57c00;
+  background: #d97706;
+  opacity: 1;
 }
 
 .solicitudes-loading {
@@ -88,18 +90,18 @@
 
 .solicitudes-loading p {
   font-size: 1.1rem;
-  color: #666;
+  color: #a1aec6;
 }
 
 .no-solicitudes {
   text-align: center;
   padding: 3rem 1rem;
-  background: #f5f5f5;
+  background: #334155;
   border-radius: 8px;
 }
 
 .no-solicitudes p {
-  color: #999;
+  color: #a1aec6;
   font-size: 1.1rem;
   margin: 0;
 }
@@ -111,16 +113,16 @@
 }
 
 .solicitud-card {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: #1e293b;
+  border: 1px solid #475569;
   border-radius: 8px;
   padding: 1.5rem;
   transition: all 0.3s ease;
 }
 
 .solicitud-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #2196F3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: #3b82f6;
 }
 
 .solicitud-header {
@@ -134,7 +136,7 @@
 .solicitud-info h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
-  color: #1a1a1a;
+  color: #e2e8f0;
 }
 
 .solicitud-meta {
@@ -145,16 +147,16 @@
 }
 
 .solicitud-date {
-  color: #999;
+  color: #a1aec6;
   font-size: 0.9rem;
   margin: 0;
 }
 
 .solicitud-cc {
-  color: #666;
+  color: #a1aec6;
   font-size: 0.9rem;
   font-weight: 500;
-  background: #f0f0f0;
+  background: #334155;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
 }
@@ -162,8 +164,8 @@
 .solicitud-rol-badge {
   display: inline-block;
   padding: 0.35rem 0.75rem;
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 500;
@@ -193,38 +195,38 @@
 
 .solicitud-message {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: #cbd5e1;
   line-height: 1.6;
 }
 
 .solicitud-message strong {
   font-weight: 600;
-  color: #1a1a1a;
+  color: #e2e8f0;
 }
 
 .solicitud-response {
   margin: 0;
   padding: 1rem;
-  background: #f5f5f5;
-  border-left: 4px solid #4CAF50;
-  color: #333;
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 4px solid #10b981;
+  color: #cbd5e1;
   line-height: 1.6;
 }
 
 .solicitud-response strong {
   font-weight: 600;
-  color: #2d5016;
+  color: #6ee7b7;
 }
 
 .respuesta-section {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #475569;
   padding-top: 1rem;
 }
 
 .solicitud-view-only {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #475569;
   padding-top: 1rem;
-  background: #f0f8ff;
+  background: rgba(59, 130, 246, 0.15);
   padding: 1rem;
   border-radius: 6px;
   margin-top: 1rem;
@@ -232,7 +234,7 @@
 
 .solicitud-view-only p {
   margin: 0;
-  color: #0066cc;
+  color: #60a5fa;
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -246,17 +248,19 @@
 .respuesta-textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid #475569;
   border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
+  background: #1e293b;
+  color: #cbd5e1;
 }
 
 .respuesta-textarea:focus {
   outline: none;
-  border-color: #2196F3;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .respuesta-actions {
@@ -277,26 +281,27 @@
 }
 
 .btn-enviar {
-  background: #4CAF50;
+  background: #10b981;
   color: white;
 }
 
 .btn-enviar:hover:not(:disabled) {
-  background: #45a049;
+  background: #059669;
+  opacity: 1;
 }
 
 .btn-enviar:disabled {
-  background: #ccc;
+  background: #6b7280;
   cursor: not-allowed;
 }
 
 .btn-cancelar {
-  background: #f0f0f0;
-  color: #333;
+  background: #334155;
+  color: #cbd5e1;
 }
 
 .btn-cancelar:hover:not(:disabled) {
-  background: #e0e0e0;
+  background: #475569;
 }
 
 .btn-cancelar:disabled {
@@ -305,13 +310,14 @@
 }
 
 .btn-responder {
-  background: #2196F3;
+  background: #3b82f6;
   color: white;
   align-self: flex-start;
 }
 
 .btn-responder:hover {
-  background: #0b7dda;
+  background: #2563eb;
+  opacity: 1;
 }
 
 /* Responsive */
