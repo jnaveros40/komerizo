@@ -26,29 +26,57 @@
   gap: 1rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
-}
-
-.filtro-btn {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e0e0e0;
-  background: white;
+  align-items: flex-end;
+  background: #f9f9f9;
+  padding: 1rem;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  color: #666;
+  border: 1px solid #e0e0e0;
 }
 
-.filtro-btn:hover {
+.filtro-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filtro-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.filtro-select,
+.filtro-input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: white;
+  min-width: 150px;
+}
+
+.filtro-select:focus,
+.filtro-input:focus {
+  outline: none;
   border-color: #2196F3;
-  color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
-.filtro-btn.active {
-  background: #2196F3;
+.filtro-btn-reset {
+  padding: 0.6rem 1.2rem;
+  background: #ff9800;
   color: white;
-  border-color: #2196F3;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.filtro-btn-reset:hover {
+  background: #f57c00;
 }
 
 .solicitudes-loading {
@@ -113,12 +141,22 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .solicitud-date {
   color: #999;
   font-size: 0.9rem;
   margin: 0;
+}
+
+.solicitud-cc {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: #f0f0f0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
 }
 
 .solicitud-rol-badge {
@@ -286,8 +324,31 @@
     font-size: 1.5rem;
   }
 
+  .filtro-selector {
+    flex-direction: column;
+  }
+
+  .filtro-group,
+  .filtro-select,
+  .filtro-input,
+  .filtro-btn-reset {
+    width: 100%;
+  }
+
+  .filtro-select,
+  .filtro-input,
+  .filtro-btn-reset {
+    min-width: unset;
+  }
+
   .solicitud-header {
     flex-direction: column;
+  }
+
+  .solicitud-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
   }
 
   .estado-badge {

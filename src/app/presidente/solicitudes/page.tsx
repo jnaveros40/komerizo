@@ -9,6 +9,7 @@ interface Solicitud {
   id: string
   usuario_id: string
   usuario_nombre: string
+  usuario_cc: string
   destinatario_rol_id: number
   destinatario_rol_nombre?: string
   estado: 'Pendiente' | 'Respondido'
@@ -23,6 +24,10 @@ export default function SolicitudesPage() {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([])
   const [loading, setLoading] = useState(true)
   const [filtro, setFiltro] = useState<'todos' | 'asignados'>('todos')
+  const [filtroEstado, setFiltroEstado] = useState<'Todos' | 'Pendiente' | 'Respondido'>('Todos')
+  const [filtroResponsable, setFiltroResponsable] = useState<string>('todos')
+  const [filtroCedula, setFiltroCedula] = useState<string>('')
+  const [rolesDisponibles, setRolesDisponibles] = useState<Array<{id: number, nombre: string}>>([])
   const [respondingTo, setRespondingTo] = useState<string | null>(null)
   const [respuesta, setRespuesta] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -33,7 +38,7 @@ export default function SolicitudesPage() {
     if (user?.id) {
       loadRolesAndFetchSolicitudes()
     }
-  }, [user, filtro])
+  }, [user, filtro, filtroEstado, filtroResponsable, filtroCedula])
 
   const loadRolesAndFetchSolicitudes = async () => {
     try {
@@ -48,6 +53,14 @@ export default function SolicitudesPage() {
 
       const presidenteId = rolesData?.id || null
       setPresidenteRoleId(presidenteId)
+
+      // Get all available roles for the dropdown
+      const { data: allRolesData } = await supabase
+        .from('komerizo_roles')
+        .select('id, nombre')
+        .order('nombre')
+
+      setRolesDisponibles(allRolesData || [])
 
       // Get all roles for current user
       const { data: userRolesData } = await supabase
@@ -73,16 +86,16 @@ export default function SolicitudesPage() {
 
       if (solicitudesData && solicitudesData.length > 0) {
         // Filter solicitudes that are for user's roles
-        const filteredSolicitudes = solicitudesData.filter(sol =>
+        let filteredSolicitudes = solicitudesData.filter(sol =>
           roleIds.includes(sol.destinatario_rol_id)
         )
 
-        // Enrich with usuario names
+        // Enrich with usuario names, CC and role names
         const enrichedSolicitudes = await Promise.all(
           filteredSolicitudes.map(async (sol: any) => {
             const { data: userData } = await supabase
               .from('komerizo_usuarios')
-              .select('nombre')
+              .select('nombre, cc')
               .eq('id', sol.usuario_id)
               .single()
 
@@ -95,12 +108,35 @@ export default function SolicitudesPage() {
             return {
               ...sol,
               usuario_nombre: userData?.nombre || 'Usuario Desconocido',
+              usuario_cc: userData?.cc || '',
               destinatario_rol_nombre: rolData?.nombre || 'Rol Desconocido'
             }
           })
         )
 
-        setSolicitudes(enrichedSolicitudes)
+        // Apply additional filters
+        let finalSolicitudes = enrichedSolicitudes
+
+        // Filter by estado
+        if (filtroEstado !== 'Todos') {
+          finalSolicitudes = finalSolicitudes.filter(sol => sol.estado === filtroEstado)
+        }
+
+        // Filter by responsable (rol destinatario)
+        if (filtroResponsable !== 'todos') {
+          finalSolicitudes = finalSolicitudes.filter(
+            sol => sol.destinatario_rol_id.toString() === filtroResponsable
+          )
+        }
+
+        // Filter by cedula
+        if (filtroCedula.trim() !== '') {
+          finalSolicitudes = finalSolicitudes.filter(sol =>
+            sol.usuario_cc.includes(filtroCedula.trim())
+          )
+        }
+
+        setSolicitudes(finalSolicitudes)
       } else {
         setSolicitudes([])
       }
@@ -151,7 +187,6 @@ export default function SolicitudesPage() {
   }
 
   const pendientesCount = solicitudes.filter(s => s.estado === 'Pendiente').length
-  const respondidosCount = solicitudes.filter(s => s.estado === 'Respondido').length
 
   if (loading) {
     return <div className="solicitudes-loading"><p>Cargando solicitudes...</p></div>
@@ -166,17 +201,55 @@ export default function SolicitudesPage() {
 
       {/* Filtros */}
       <div className="filtro-selector">
+        <div className="filtro-group">
+          <label className="filtro-label">Estado:</label>
+          <select
+            className="filtro-select"
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value as any)}
+          >
+            <option value="Todos">Todos</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Respondido">Respondido</option>
+          </select>
+        </div>
+
+        <div className="filtro-group">
+          <label className="filtro-label">Responsable:</label>
+          <select
+            className="filtro-select"
+            value={filtroResponsable}
+            onChange={(e) => setFiltroResponsable(e.target.value)}
+          >
+            <option value="todos">Todos los roles</option>
+            {rolesDisponibles.map((rol) => (
+              <option key={rol.id} value={rol.id.toString()}>
+                {rol.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filtro-group">
+          <label className="filtro-label">Cédula:</label>
+          <input
+            type="text"
+            className="filtro-input"
+            placeholder="Buscar por cédula..."
+            value={filtroCedula}
+            onChange={(e) => setFiltroCedula(e.target.value)}
+          />
+        </div>
+
         <button
-          className={`filtro-btn ${filtro === 'todos' ? 'active' : ''}`}
-          onClick={() => setFiltro('todos')}
+          className="filtro-btn-reset"
+          onClick={() => {
+            setFiltroEstado('Todos')
+            setFiltroResponsable('todos')
+            setFiltroCedula('')
+          }}
         >
-          Todos {solicitudes.length > 0 && `(${solicitudes.length})`}
-        </button>
-        <button
-          className={`filtro-btn ${filtro === 'asignados' ? 'active' : ''}`}
-          onClick={() => setFiltro('asignados')}
-        >
-          Asignados {pendientesCount > 0 && `(${pendientesCount})`}
+          Limpiar Filtros
         </button>
       </div>
 
@@ -194,6 +267,7 @@ export default function SolicitudesPage() {
                   <h3>{sol.usuario_nombre}</h3>
                   <div className="solicitud-meta">
                     <p className="solicitud-date">{new Date(sol.fecha_solicitud).toLocaleDateString('es-CO')}</p>
+                    <span className="solicitud-cc">CC: {sol.usuario_cc}</span>
                     <span className="solicitud-rol-badge">{sol.destinatario_rol_nombre}</span>
                   </div>
                 </div>
