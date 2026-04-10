@@ -18,22 +18,27 @@ export default function CoordinadoresComisionesSidebar({ user }: { user: any }) 
   const menuItems = [
     {
       label: 'Dashboard',
-      href: '/coordinadores-comisiones',
+      href: '/coordinador-comision-trabajo',
       icon: '📊',
     },
     {
+      label: 'Solicitudes',
+      href: '/coordinador-comision-trabajo/solicitudes',
+      icon: '📋',
+    },
+    {
       label: 'Comisiones',
-      href: '/coordinadores-comisiones/comisiones',
+      href: '/coordinador-comision-trabajo/comisiones',
       icon: '📋',
     },
     {
       label: 'Reportes',
-      href: '/coordinadores-comisiones/reportes',
+      href: '/coordinador-comision-trabajo/reportes',
       icon: '📈',
     },
     {
       label: 'Miembros',
-      href: '/coordinadores-comisiones/miembros',
+      href: '/coordinador-comision-trabajo/miembros',
       icon: '👥',
     },
   ]
@@ -75,7 +80,7 @@ export default function CoordinadoresComisionesSidebar({ user }: { user: any }) 
   }
 
   const isActive = (href: string) => {
-    if (href === '/coordinadores-comisiones') {
+    if (href === '/coordinador-comision-trabajo') {
       return pathname === href
     }
     return pathname.startsWith(href)

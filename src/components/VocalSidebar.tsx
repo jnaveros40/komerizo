@@ -22,6 +22,11 @@ export default function VocalSidebar({ user }: { user: any }) {
       icon: '📊',
     },
     {
+      label: 'Solicitudes',
+      href: '/vocal/solicitudes',
+      icon: '📋',
+    },
+    {
       label: 'Votaciones',
       href: '/vocal/votaciones',
       icon: '🗳️',

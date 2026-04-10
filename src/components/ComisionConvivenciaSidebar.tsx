@@ -22,6 +22,11 @@ export default function ComisionConvivenciaSidebar({ user }: { user: any }) {
       icon: '📊',
     },
     {
+      label: 'Solicitudes',
+      href: '/comision-convivencia/solicitudes',
+      icon: '📋',
+    },
+    {
       label: 'Reportes',
       href: '/comision-convivencia/reportes',
       icon: '📋',

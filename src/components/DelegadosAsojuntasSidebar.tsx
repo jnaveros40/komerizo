@@ -22,6 +22,11 @@ export default function DelegadosAsojuntasSidebar({ user }: { user: any }) {
       icon: '📊',
     },
     {
+      label: 'Solicitudes',
+      href: '/delegados-asojuntas/solicitudes',
+      icon: '📋',
+    },
+    {
       label: 'Reuniones',
       href: '/delegados-asojuntas/reuniones',
       icon: '📅',

@@ -17,6 +17,7 @@ export default function AdministradorSidebar({ user }: { user: any }) {
 
   const menuItems = [
     { href: '/administrador', label: '📊 Dashboard', icon: '📊' },
+    { href: '/administrador/solicitudes', label: '📋 Solicitudes', icon: '📋' },
     { href: '/administrador/usuarios', label: '👥 Usuarios', icon: '👥' },
     { href: '/administrador/comunas', label: '🏘️ Comunas y Barrios', icon: '🏘️' },
     { href: '/administrador/configuracion', label: '⚙️ Configuración', icon: '⚙️' },

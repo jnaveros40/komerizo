@@ -22,6 +22,11 @@ export default function JuntaDirectivaSidebar({ user }: { user: any }) {
       icon: '📊',
     },
     {
+      label: 'Solicitudes',
+      href: '/junta-directiva/solicitudes',
+      icon: '📋',
+    },
+    {
       label: 'Miembros',
       href: '/junta-directiva/miembros',
       icon: '👥',
