@@ -10,6 +10,7 @@ export default function UsuarioInformacionPage() {
   const [comunaName, setComunaName] = useState('')
   const [barrioName, setBarrioName] = useState('')
   const [tipoDocumento, setTipoDocumento] = useState('')
+  const [usuarioData, setUsuarioData] = useState<any>(null)
 
   useEffect(() => {
     fetchUserData()
@@ -19,31 +20,42 @@ export default function UsuarioInformacionPage() {
     if (!user) return
 
     try {
-      // Comuna y Barrio
-      if (user.comuna_id) {
+      // Obtener datos frescos del usuario de Supabase
+      const { data: userData, error: userError } = await supabase
+        .from('komerizo_usuarios')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (userError) throw userError
+      setUsuarioData(userData)
+
+      // Comuna
+      if (userData.comuna_id) {
         const { data: comunaData } = await supabase
           .from('komerizo_comunas')
           .select('nombre')
-          .eq('id', user.comuna_id)
+          .eq('id', userData.comuna_id)
           .single()
         setComunaName(comunaData?.nombre || '')
       }
 
-      if (user.barrio_id) {
+      // Barrio
+      if (userData.barrio_id) {
         const { data: barrioData } = await supabase
           .from('komerizo_barrios')
           .select('nombre')
-          .eq('id', user.barrio_id)
+          .eq('id', userData.barrio_id)
           .single()
         setBarrioName(barrioData?.nombre || '')
       }
 
       // Tipo de documento
-      if (user.tipo_documento_id) {
+      if (userData.tipo_documento_id) {
         const { data: tipoDocData } = await supabase
           .from('komerizo_tipo_documento')
           .select('nombre')
-          .eq('id', user.tipo_documento_id)
+          .eq('id', userData.tipo_documento_id)
           .single()
         setTipoDocumento(tipoDocData?.nombre || '')
       }
@@ -71,27 +83,32 @@ export default function UsuarioInformacionPage() {
 
             <div className="info-item">
               <label>Cédula:</label>
-              <p>{user?.cc || 'N/A'}</p>
+              <p>{usuarioData?.cc || 'N/A'}</p>
             </div>
 
             <div className="info-item">
               <label>Nombre:</label>
-              <p>{user?.nombre || 'N/A'}</p>
+              <p>{usuarioData?.nombre || 'N/A'}</p>
             </div>
 
             <div className="info-item">
               <label>Apellido:</label>
-              <p>{user?.apellido || 'N/A'}</p>
+              <p>{usuarioData?.apellido || 'N/A'}</p>
             </div>
 
             <div className="info-item">
               <label>Correo Electrónico:</label>
-              <p>{user?.correo_electronico || 'N/A'}</p>
+              <p>{usuarioData?.correo_electronico || 'N/A'}</p>
             </div>
 
             <div className="info-item">
               <label>Teléfono:</label>
-              <p>{user?.telefono || 'N/A'}</p>
+              <p>{usuarioData?.telefono || 'N/A'}</p>
+            </div>
+
+            <div className="info-item">
+              <label>Dirección:</label>
+              <p>{usuarioData?.direccion || 'N/A'}</p>
             </div>
           </div>
         </div>
