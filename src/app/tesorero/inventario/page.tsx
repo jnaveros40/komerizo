@@ -383,7 +383,7 @@ export default function TesoreroInventarioPage() {
       // ===== SECCIÓN 1: INVENTARIO ACTUAL =====
       doc.setFontSize(14);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text('📦 Inventario Actual', 20, yPosition);
+      doc.text('Inventario Actual', 20, yPosition);
       yPosition += 10;
 
       console.log('📦 Creando tabla de inventario. Items:', inventario.length);
@@ -435,7 +435,7 @@ export default function TesoreroInventarioPage() {
       // ===== SECCIÓN 2: RESUMEN FINANCIERO =====
       doc.setFontSize(14);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text('💰 Resumen del Período', 20, yPosition);
+      doc.text('Resumen del Período', 20, yPosition);
       yPosition += 10;
 
       doc.setFontSize(11);
@@ -450,12 +450,12 @@ export default function TesoreroInventarioPage() {
       doc.text(`Total de Cambios Registrados: ${reporte.total_cambios}`, 20, yPosition);
       yPosition += 15;
 
-      console.log('✅ Resumen financiero agregado');
+      console.log('Resumen financiero agregado');
 
       // ===== SECCIÓN 3: DETALLE DE CAMBIOS =====
       doc.setFontSize(14);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text('📋 Detalle de Cambios Registrados', 20, yPosition);
+      doc.text('Detalle de Cambios Registrados', 20, yPosition);
       yPosition += 10;
 
       if ((reporte as any).detalles) {
