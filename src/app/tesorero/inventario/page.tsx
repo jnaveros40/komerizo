@@ -25,19 +25,22 @@ const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], p
   const headerHeight = Math.max(10, maxHeaderLines * 5 + 4);
 
   // Dibujar encabezados
-  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.setTextColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
   
   headers.forEach((_, i) => {
-    doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'F');
+    // Recuadro de fondo
+    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'FD');
+    
+    // Texto
+    doc.setTextColor(255, 255, 255);
     doc.text(headerLinesArr[i], margin + i * cellWidth + padding, yPos + 6);
   });
 
   yPos += headerHeight;
 
   // Dibujar filas
-  doc.setTextColor(0, 0, 0);
   doc.setFont(undefined, 'normal');
   
   rows.forEach((row: any[]) => {
@@ -53,21 +56,24 @@ const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], p
       yPos = margin;
       
       // Volver a dibujar encabezados en página nueva
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.setTextColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
       headers.forEach((_, i) => {
-        doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'F');
+        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.setDrawColor(0, 0, 0);
+        doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'FD');
+        doc.setTextColor(255, 255, 255);
         doc.text(headerLinesArr[i], margin + i * cellWidth + padding, yPos + 6);
       });
       yPos += headerHeight;
-      doc.setTextColor(0, 0, 0);
       doc.setFont(undefined, 'normal');
     }
 
     cellLines.forEach((lines: any[], colIndex: number) => {
-      doc.rect(margin + colIndex * cellWidth, yPos, cellWidth, rowHeight);
-      doc.text(lines, margin + colIndex * cellWidth + padding, yPos + 7);
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(0, 0, 0);
+      doc.rect(margin + colIndex * cellWidth, yPos, cellWidth, rowHeight, 'S');
+      doc.setTextColor(0, 0, 0);
+      doc.text(lines, margin + colIndex * cellWidth + padding, yPos + 6);
     });
     
     yPos += rowHeight;
