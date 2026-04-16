@@ -503,16 +503,20 @@ export default function TesoreroInventarioPage() {
             // Crear tabla detallada de cambios
             const tableData = cambios.map((cambio: any) => {
               let detalle = '';
+              const cantAnterior = cambio.cantidad_anterior ?? 0;
+              const valAnterior = cambio.valor_unitario_anterior ?? 0;
+              const estAnterior = cambio.estado_anterior ?? 'N/A';
 
-              if (cambio.cantidad_anterior !== cambio.cantidad_nueva) {
-                detalle += `Cant: ${cambio.cantidad_anterior} -> ${cambio.cantidad_nueva}\n`;
+              if (cantAnterior !== cambio.cantidad_nueva) {
+                detalle += `Cant: ${cantAnterior} -> ${cambio.cantidad_nueva}\n`;
               }
 
-              if (cambio.valor_unitario_anterior !== cambio.valor_unitario_nueva) {
-                detalle += `Valor: $${cambio.valor_unitario_anterior} -> $${cambio.valor_unitario_nueva}\n`;
+              if (valAnterior !== cambio.valor_unitario_nueva) {
+                detalle += `Valor: $${valAnterior} -> $${cambio.valor_unitario_nueva}\n`;
               }
-
-
+              if (estAnterior !== cambio.estado_nuevo && cambio.estado_nuevo) {
+                detalle += `Estado: ${estAnterior} -> ${cambio.estado_nuevo}`;
+              }
 
               return [
                 new Date(cambio.fecha_cambio).toLocaleDateString('es-ES'),
@@ -555,19 +559,23 @@ export default function TesoreroInventarioPage() {
                 doc.setTextColor(0, 0, 0);
                 doc.setFontSize(9);
 
+                const cantAnterior = cambio.cantidad_anterior ?? 0;
+                const valAnterior = cambio.valor_unitario_anterior ?? 0;
+                const estAnterior = cambio.estado_anterior ?? 'N/A';
+
                 // Resumen de cambios
-                if (cambio.cantidad_anterior !== cambio.cantidad_nueva) {
-                  doc.text(`  • Cantidad: ${cambio.cantidad_anterior} → ${cambio.cantidad_nueva}`, 25, yPosition);
+                if (cantAnterior !== cambio.cantidad_nueva) {
+                  doc.text(`  • Cantidad: ${cantAnterior} -> ${cambio.cantidad_nueva}`, 25, yPosition);
                   yPosition += 5;
                 }
 
-                if (cambio.valor_unitario_anterior !== cambio.valor_unitario_nueva) {
-                  doc.text(`  • Valor Unitario: $${cambio.valor_unitario_anterior} → $${cambio.valor_unitario_nueva}`, 25, yPosition);
+                if (valAnterior !== cambio.valor_unitario_nueva) {
+                  doc.text(`  • Valor Unitario: $${valAnterior} -> $${cambio.valor_unitario_nueva}`, 25, yPosition);
                   yPosition += 5;
                 }
 
-                if (cambio.estado_anterior !== cambio.estado_nuevo) {
-                  doc.text(`  • Estado: ${cambio.estado_anterior} → ${cambio.estado_nuevo}`, 25, yPosition);
+                if (estAnterior !== cambio.estado_nuevo && cambio.estado_nuevo) {
+                  doc.text(`  • Estado: ${estAnterior} -> ${cambio.estado_nuevo}`, 25, yPosition);
                   yPosition += 5;
                 }
 
@@ -1124,47 +1132,57 @@ export default function TesoreroInventarioPage() {
                     📝 Cambios Registrados:
                   </div>
 
-                  {cambio.cantidad_anterior !== cambio.cantidad_nueva && (
-                    <div
-                      style={{
-                        background: '#0f1419',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        marginBottom: '0.5rem',
-                        fontSize: '0.9rem',
-                      }}
-                    >
-                      <strong>Cantidad:</strong> {cambio.cantidad_anterior} → {cambio.cantidad_nueva}
-                    </div>
-                  )}
+                  {(() => {
+                    const cantAnterior = cambio.cantidad_anterior ?? 0;
+                    const valAnterior = cambio.valor_unitario_anterior ?? 0;
+                    const estAnterior = cambio.estado_anterior ?? 'N/A';
 
-                  {cambio.valor_unitario_anterior !== cambio.valor_unitario_nueva && (
-                    <div
-                      style={{
-                        background: '#0f1419',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        marginBottom: '0.5rem',
-                        fontSize: '0.9rem',
-                      }}
-                    >
-                      <strong>Valor Unitario:</strong> ${cambio.valor_unitario_anterior} → ${cambio.valor_unitario_nueva}
-                    </div>
-                  )}
+                    return (
+                      <>
+                        {cantAnterior !== cambio.cantidad_nueva && (
+                          <div
+                            style={{
+                              background: '#0f1419',
+                              padding: '0.75rem',
+                              borderRadius: '4px',
+                              marginBottom: '0.5rem',
+                              fontSize: '0.9rem',
+                            }}
+                          >
+                            <strong>Cantidad:</strong> {cantAnterior} → {cambio.cantidad_nueva}
+                          </div>
+                        )}
 
-                  {cambio.estado_anterior !== cambio.estado_nuevo && (
-                    <div
-                      style={{
-                        background: '#0f1419',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        marginBottom: '0.5rem',
-                        fontSize: '0.9rem',
-                      }}
-                    >
-                      <strong>Estado:</strong> {cambio.estado_anterior} → {cambio.estado_nuevo}
-                    </div>
-                  )}
+                        {valAnterior !== cambio.valor_unitario_nueva && (
+                          <div
+                            style={{
+                              background: '#0f1419',
+                              padding: '0.75rem',
+                              borderRadius: '4px',
+                              marginBottom: '0.5rem',
+                              fontSize: '0.9rem',
+                            }}
+                          >
+                            <strong>Valor Unitario:</strong> ${valAnterior} → ${cambio.valor_unitario_nueva}
+                          </div>
+                        )}
+
+                        {estAnterior !== cambio.estado_nuevo && cambio.estado_nuevo && (
+                          <div
+                            style={{
+                              background: '#0f1419',
+                              padding: '0.75rem',
+                              borderRadius: '4px',
+                              marginBottom: '0.5rem',
+                              fontSize: '0.9rem',
+                            }}
+                          >
+                            <strong>Estado:</strong> {estAnterior} → {cambio.estado_nuevo}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #3a4a5f' }}>
