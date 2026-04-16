@@ -16,15 +16,22 @@ const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], p
   const maxTextWidth = cellWidth - padding * 2;
   let yPos = startY;
 
+  // Sanitizar caracteres no soportados por las fuentes normales (ej. flecha → por ->)
+  const sanitize = (text: any) => String(text || '').replace(/→/g, '->');
+
+  // Procesar encabezados
+  const headerLinesArr = headers.map(header => doc.splitTextToSize(sanitize(header), maxTextWidth));
+  const maxHeaderLines = Math.max(1, ...headerLinesArr.map((lines: any[]) => lines.length));
+  const headerHeight = Math.max(10, maxHeaderLines * 5 + 4);
+
   // Dibujar encabezados
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.setTextColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
   
-  const headerHeight = 10;
-  headers.forEach((header, i) => {
+  headers.forEach((_, i) => {
     doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'F');
-    doc.text(header, margin + i * cellWidth + padding, yPos + 7, { maxWidth: maxTextWidth });
+    doc.text(headerLinesArr[i], margin + i * cellWidth + padding, yPos + 6);
   });
 
   yPos += headerHeight;
@@ -35,8 +42,8 @@ const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], p
   
   rows.forEach((row: any[]) => {
     // Primero, dividir el texto para calcular el alto necesario para cada celda
-    const cellLines = row.map(cell => doc.splitTextToSize(String(cell), maxTextWidth));
-    const maxLines = Math.max(...cellLines.map((lines: any[]) => lines.length));
+    const cellLines = row.map(cell => doc.splitTextToSize(sanitize(cell), maxTextWidth));
+    const maxLines = Math.max(1, ...cellLines.map((lines: any[]) => lines.length));
     // 5 unidades por línea más algo de padding vertical
     const rowHeight = Math.max(10, maxLines * 5 + 4); 
 
@@ -45,13 +52,13 @@ const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], p
       doc.addPage();
       yPos = margin;
       
-      // Opcional: Volver a dibujar encabezados en página nueva
+      // Volver a dibujar encabezados en página nueva
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setTextColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
-      headers.forEach((header, i) => {
+      headers.forEach((_, i) => {
         doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'F');
-        doc.text(header, margin + i * cellWidth + padding, yPos + 7, { maxWidth: maxTextWidth });
+        doc.text(headerLinesArr[i], margin + i * cellWidth + padding, yPos + 6);
       });
       yPos += headerHeight;
       doc.setTextColor(0, 0, 0);
@@ -492,15 +499,15 @@ export default function TesoreroInventarioPage() {
               let detalle = '';
 
               if (cambio.cantidad_anterior !== cambio.cantidad_nueva) {
-                detalle += `Cant: ${cambio.cantidad_anterior} → ${cambio.cantidad_nueva}\n`;
+                detalle += `Cant: ${cambio.cantidad_anterior} -> ${cambio.cantidad_nueva}\n`;
               }
 
               if (cambio.valor_unitario_anterior !== cambio.valor_unitario_nueva) {
-                detalle += `Valor: $${cambio.valor_unitario_anterior} → $${cambio.valor_unitario_nueva}\n`;
+                detalle += `Valor: $${cambio.valor_unitario_anterior} -> $${cambio.valor_unitario_nueva}\n`;
               }
 
               if (cambio.estado_anterior !== cambio.estado_nuevo) {
-                detalle += `Estado: ${cambio.estado_anterior} → ${cambio.estado_nuevo}`;
+                detalle += `Estado: ${cambio.estado_anterior} -> ${cambio.estado_nuevo}`;
               }
 
               return [
