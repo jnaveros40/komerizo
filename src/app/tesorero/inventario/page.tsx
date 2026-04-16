@@ -6,13 +6,14 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import '@/components/reuniones.css';
 
-// Función para dibujar tablas manualmente en jsPDF
+// Función para dibujar tablas manualmente en jsPDF con soporte multilínea
 const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], primaryColor: number[]) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
   const pageHeight = doc.internal.pageSize.getHeight();
   const cellWidth = (pageWidth - 2 * margin) / headers.length;
-  const cellHeight = 10;
+  const padding = 2;
+  const maxTextWidth = cellWidth - padding * 2;
   let yPos = startY;
 
   // Dibujar encabezados
@@ -20,30 +21,49 @@ const drawTable = (doc: any, startY: number, headers: string[], rows: any[][], p
   doc.setTextColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
   
+  const headerHeight = 10;
   headers.forEach((header, i) => {
-    doc.rect(margin + i * cellWidth, yPos, cellWidth, cellHeight, 'F');
-    doc.text(header, margin + i * cellWidth + 2, yPos + 7, { maxWidth: cellWidth - 4 });
+    doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'F');
+    doc.text(header, margin + i * cellWidth + padding, yPos + 7, { maxWidth: maxTextWidth });
   });
 
-  yPos += cellHeight;
+  yPos += headerHeight;
 
   // Dibujar filas
   doc.setTextColor(0, 0, 0);
   doc.setFont(undefined, 'normal');
   
-  rows.forEach((row: any[], rowIndex: number) => {
+  rows.forEach((row: any[]) => {
+    // Primero, dividir el texto para calcular el alto necesario para cada celda
+    const cellLines = row.map(cell => doc.splitTextToSize(String(cell), maxTextWidth));
+    const maxLines = Math.max(...cellLines.map((lines: any[]) => lines.length));
+    // 5 unidades por línea más algo de padding vertical
+    const rowHeight = Math.max(10, maxLines * 5 + 4); 
+
     // Validar si necesitamos nueva página
-    if (yPos + cellHeight > pageHeight - 20) {
+    if (yPos + rowHeight > pageHeight - margin) {
       doc.addPage();
-      yPos = 20;
+      yPos = margin;
+      
+      // Opcional: Volver a dibujar encabezados en página nueva
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      headers.forEach((header, i) => {
+        doc.rect(margin + i * cellWidth, yPos, cellWidth, headerHeight, 'F');
+        doc.text(header, margin + i * cellWidth + padding, yPos + 7, { maxWidth: maxTextWidth });
+      });
+      yPos += headerHeight;
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, 'normal');
     }
 
-    row.forEach((cell: any, colIndex: number) => {
-      doc.rect(margin + colIndex * cellWidth, yPos, cellWidth, cellHeight);
-      doc.text(String(cell), margin + colIndex * cellWidth + 2, yPos + 7, { maxWidth: cellWidth - 4 });
+    cellLines.forEach((lines: any[], colIndex: number) => {
+      doc.rect(margin + colIndex * cellWidth, yPos, cellWidth, rowHeight);
+      doc.text(lines, margin + colIndex * cellWidth + padding, yPos + 7);
     });
     
-    yPos += cellHeight;
+    yPos += rowHeight;
   });
 
   return yPos + 10;
