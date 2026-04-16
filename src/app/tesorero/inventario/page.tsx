@@ -506,9 +506,7 @@ export default function TesoreroInventarioPage() {
                 detalle += `Valor: $${cambio.valor_unitario_anterior} -> $${cambio.valor_unitario_nueva}\n`;
               }
 
-              if (cambio.estado_anterior !== cambio.estado_nuevo) {
-                detalle += `Estado: ${cambio.estado_anterior} -> ${cambio.estado_nuevo}`;
-              }
+
 
               return [
                 new Date(cambio.fecha_cambio).toLocaleDateString('es-ES'),
