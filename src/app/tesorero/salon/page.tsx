@@ -184,6 +184,32 @@ export default function TesoreroSalonPage() {
     }
   };
 
+  const handleConsumoInterno = async (alquilerId: number, currentValor: number) => {
+    const isInterno = currentValor === 0;
+    
+    if (isInterno) {
+      alert('Esta reserva ya está marcada como consumo interno (valor $0).');
+      return;
+    }
+
+    if (!confirm('¿Deseas marcar esta reserva como Consumo Interno? El valor total pasará a $0.')) return;
+
+    try {
+      const { error } = await supabase
+        .from('komerizo_alquileres')
+        .update({ valor_total: 0, actualizado_at: new Date().toISOString() })
+        .eq('id', alquilerId);
+
+      if (error) throw error;
+
+      alert('Reserva marcada como Consumo Interno');
+      await loadData();
+    } catch (error) {
+      console.error('Error actualizando alquiler:', error);
+      alert('Error al actualizar la reserva');
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: '2rem', color: '#a1aec6' }}>Cargando...</div>;
   }
@@ -441,7 +467,22 @@ export default function TesoreroSalonPage() {
                   </div>
 
                   {alquiler.estado === 'confirmado' && (
-                    <div className="reunion-acciones">
+                    <div className="reunion-acciones" style={{ display: 'flex', gap: '1rem' }}>
+                      {alquiler.valor_total > 0 && (
+                        <button
+                          onClick={() => handleConsumoInterno(alquiler.id, alquiler.valor_total)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#2ecc71',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ✓ Consumo Interno ($0)
+                        </button>
+                      )}
                       <button
                         onClick={() => handleCancelarAlquiler(alquiler.id)}
                         style={{
