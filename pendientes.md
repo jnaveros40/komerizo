@@ -12,13 +12,13 @@
 - [x] Tabla `comision_empresarial`
 
 ## Afiliado
-- [ ] Módulo de Tesorería (Ver historial de movimientos financieros, saldo disponible, comprobantes).
+- [x] Módulo de Tesorería (Ver historial de movimientos financieros, saldo disponible, comprobantes).
 - [x] Módulo de Documentos (Ver actas, estatutos, reglamentos, informes de gestión).
-- [ ] Módulo de Solicitudes (Cambio de comisión de trabajo, desafiliación).
-- [ ] Módulo de Afiliados (Ver a otros afiliados y su estado).
-- [ ] Módulo de Asistencia (Ver historial de participación y justify).
+- [x] Módulo de Solicitudes (Cambio de comisión de trabajo, desafiliación).
+- [x] Módulo de Afiliados (Ver a otros afiliados y su estado).
+- [x] Módulo de Asistencia (Ver historial de participación y justify).
 - [x] Módulo de Perfil (Actualizar datos personales, descargar certificado de afiliación).
-- [ ] Módulo de Tienda (Comprar productos generados por tesorería y generar recibo).
+- [x] Módulo de Tienda (Comprar productos generados por tesorería y generar recibo).
 
 ## Asamblea General (Secretaría)
 - [ ] Gestión de Actas (Crear y adjuntar archivos).

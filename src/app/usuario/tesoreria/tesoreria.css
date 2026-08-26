@@ -1,0 +1,178 @@
+.tesoreria-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tesoreria-header {
+  margin-bottom: 2rem;
+}
+
+.tesoreria-header h1 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.saldo-card {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2);
+  text-align: center;
+}
+
+.saldo-card h3 {
+  margin: 0 0 1rem 0;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.saldo-amount {
+  font-size: 3.5rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.saldo-note {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.movimientos-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.movimientos-section h2 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.movimientos-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.movimientos-table th {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  color: #7f8c8d;
+  font-weight: 600;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.movimientos-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #ecf0f1;
+  vertical-align: middle;
+}
+
+.td-datetime {
+  display: flex;
+  flex-direction: column;
+}
+
+.td-date {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.td-time {
+  font-size: 0.8rem;
+  color: #95a5a6;
+}
+
+.badge-tipo {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-tipo.ingreso {
+  background-color: #e8f8f5;
+  color: #27ae60;
+}
+
+.badge-tipo.gasto {
+  background-color: #fdedec;
+  color: #e74c3c;
+}
+
+.td-concepto {
+  display: flex;
+  flex-direction: column;
+}
+
+.td-concepto strong {
+  color: #2c3e50;
+}
+
+.td-justificacion {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-top: 0.2rem;
+}
+
+.td-responsable {
+  display: flex;
+  flex-direction: column;
+}
+
+.td-rol {
+  font-size: 0.85rem;
+  background: #f1f2f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #2f3542;
+  display: inline-block;
+  width: max-content;
+}
+
+.td-monto {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.td-monto.ingreso {
+  color: #27ae60;
+}
+
+.td-monto.gasto {
+  color: #e74c3c;
+}
+
+.btn-comprobante {
+  background-color: #3498db;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.btn-comprobante:hover {
+  background-color: #2980b9;
+}
+
+.no-comprobante {
+  color: #bdc3c7;
+  font-size: 0.9rem;
+  font-style: italic;
+}
