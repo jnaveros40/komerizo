@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
+import jsPDF from 'jspdf'
 import './perfil.css'
 
 type Perfil = {
@@ -163,6 +164,60 @@ export default function UsuarioPerfil() {
     }
   }
 
+  const handleDownloadCertificado = () => {
+    if (!perfil) return;
+    
+    const doc = new jsPDF();
+    
+    // Configuración de fuente y colores
+    doc.setFont('helvetica');
+    
+    // Título
+    doc.setFontSize(22);
+    doc.setTextColor(44, 62, 80);
+    doc.text('CERTIFICADO DE AFILIACIÓN', 105, 30, { align: 'center' });
+    
+    // Subtítulo / JAC
+    doc.setFontSize(16);
+    doc.setTextColor(52, 73, 94);
+    doc.text('Junta de Acción Comunal', 105, 42, { align: 'center' });
+    
+    // Cuerpo del texto
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    const currentDate = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+    
+    const bodyText = `Por medio de la presente, la Junta de Acción Comunal certifica que:`;
+    doc.text(bodyText, 20, 70);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${perfil.nombre.toUpperCase()} ${perfil.apellido.toUpperCase()}`, 105, 90, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    
+    doc.text(`Identificado(a) con ${perfil.tipo_documento} No. ${perfil.cc}`, 105, 100, { align: 'center' });
+    
+    const statusText = `Se encuentra actualmente en estado: ${perfil.estado.toUpperCase()}`;
+    doc.text(statusText, 20, 120);
+    
+    doc.text(`Registrado(a) en la Comuna: ${perfil.comuna} - Barrio: ${perfil.barrio}`, 20, 130);
+    
+    doc.text(`Constancia expedida el día ${currentDate}.`, 20, 150);
+    
+    // Firmas (Espacios)
+    doc.line(30, 220, 80, 220); // Línea firma 1
+    doc.text('Presidente JAC', 55, 230, { align: 'center' });
+    
+    doc.line(130, 220, 180, 220); // Línea firma 2
+    doc.text('Secretario(a) JAC', 155, 230, { align: 'center' });
+    
+    // Pie de página
+    doc.setFontSize(10);
+    doc.setTextColor(127, 140, 141);
+    doc.text('Este documento es generado automáticamente por el sistema Komerizo.', 105, 280, { align: 'center' });
+    
+    doc.save(`Certificado_Afiliacion_${perfil.cc}.pdf`);
+  }
+
   if (loading) {
     return (
       <div className="perfil-container">
@@ -181,9 +236,29 @@ export default function UsuarioPerfil() {
 
   return (
     <div className="perfil-container">
-      <div className="perfil-header">
-        <h1>👤 Mi Perfil</h1>
-        <p className="header-subtitle">Actualiza tu información personal</p>
+      <div className="perfil-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1>👤 Mi Perfil</h1>
+          <p className="header-subtitle">Actualiza tu información personal</p>
+        </div>
+        <button 
+          className="btn-download-cert" 
+          onClick={handleDownloadCertificado}
+          style={{ 
+            backgroundColor: '#2ecc71', 
+            color: 'white', 
+            border: 'none', 
+            padding: '10px 20px', 
+            borderRadius: '5px', 
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          📄 Descargar Certificado
+        </button>
       </div>
 
       {message && (
