@@ -85,7 +85,7 @@ export default function UsuarioInformacionPage() {
   const downloadCertificate = async () => {
     try {
       setLoadingCertificate(true)
-      
+
       // Obtener Presidentes y Secretarios que pertenezcan a la misma comuna
       const { data: rolesData } = await supabase
         .from('komerizo_roles')
@@ -96,7 +96,7 @@ export default function UsuarioInformacionPage() {
 
       // Obtener usuarios con estos roles y misma comuna
       let dirigentes: any = { presidente: null, secretario: null }
-      
+
       if (roleIds.length > 0) {
         const { data: usuariosRolesData } = await supabase
           .from('komerizo_usuario_roles')
@@ -105,7 +105,7 @@ export default function UsuarioInformacionPage() {
 
         if (usuariosRolesData && usuariosRolesData.length > 0) {
           const usuarioIds = usuariosRolesData.map((ur: any) => ur.usuario_id)
-          
+
           // Obtener usuarios completos
           const { data: usuariosData } = await supabase
             .from('komerizo_usuarios')
@@ -140,7 +140,7 @@ export default function UsuarioInformacionPage() {
       const pageWidth = pdf.internal.pageSize.getWidth()
       const pageMargin = 15
       const contentWidth = pageWidth - (pageMargin * 2)
-      
+
       // Color scheme
       const primaryColor: [number, number, number] = [32, 76, 175]
       const textColor: [number, number, number] = [51, 51, 51]
@@ -155,7 +155,7 @@ export default function UsuarioInformacionPage() {
       pdf.text('CERTIFICADO DE AFILIACIÓN', pageWidth / 2, 12, { align: 'center' })
       pdf.setFontSize(9)
       pdf.setFont('helvetica', 'normal')
-      pdf.text('Komerizo - JAC Management System', pageWidth / 2, 22, { align: 'center' })
+      pdf.text('komirezo - JAC Management System', pageWidth / 2, 22, { align: 'center' })
 
       // Contenido principal
       pdf.setTextColor(textColor[0], textColor[1], textColor[2])
@@ -208,11 +208,11 @@ export default function UsuarioInformacionPage() {
           const partes = linea.split(nombreCompleto)
           pdf.setFont('helvetica', 'normal')
           pdf.text(partes[0], pageMargin, yPosition)
-          
+
           const anchoAntes = pdf.getTextWidth(partes[0])
           pdf.setFont('helvetica', 'bold')
           pdf.text(nombreCompleto, pageMargin + anchoAntes, yPosition)
-          
+
           pdf.setFont('helvetica', 'normal')
           pdf.text(partes[1], pageMargin + anchoAntes + pdf.getTextWidth(nombreCompleto), yPosition)
         } else if (linea.includes(`${tipoDoc} número ${noCedula}`)) {
@@ -220,22 +220,22 @@ export default function UsuarioInformacionPage() {
           const partes = linea.split(docInfo)
           pdf.setFont('helvetica', 'normal')
           pdf.text(partes[0], pageMargin, yPosition)
-          
+
           const anchoAntes = pdf.getTextWidth(partes[0])
           pdf.setFont('helvetica', 'bold')
           pdf.text(docInfo, pageMargin + anchoAntes, yPosition)
-          
+
           pdf.setFont('helvetica', 'normal')
           pdf.text(partes[1], pageMargin + anchoAntes + pdf.getTextWidth(docInfo), yPosition)
         } else if (linea.includes(estado)) {
           const partes = linea.split(estado)
           pdf.setFont('helvetica', 'normal')
           pdf.text(partes[0], pageMargin, yPosition)
-          
+
           const anchoAntes = pdf.getTextWidth(partes[0])
           pdf.setFont('helvetica', 'bold')
           pdf.text(estado, pageMargin + anchoAntes, yPosition)
-          
+
           pdf.setFont('helvetica', 'normal')
           pdf.text(partes[1], pageMargin + anchoAntes + pdf.getTextWidth(estado), yPosition)
         } else {
@@ -378,7 +378,7 @@ export default function UsuarioInformacionPage() {
     }
   }
 
-  
+
   return (
     <div className="usuario-container">
       <div className="usuario-header">
@@ -477,7 +477,7 @@ export default function UsuarioInformacionPage() {
         <p>
           Los datos mostrados aquí son los registrados en el sistema.
           Recuerda que puedes editar tu informacion personal en el menu Mi Perfil.
-                    
+
         </p>
       </div>
     </div>
