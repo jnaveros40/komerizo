@@ -88,7 +88,7 @@ export default function UsuarioSalonPage() {
     fecha_inicio: getTodayDate(),
     fecha_fin: getTodayDate(),
     hora_inicio: '08:00',
-    hora_fin: '09:00',
+    hora_fin: '22:00',
     motivo: '',
   });
 
@@ -111,13 +111,13 @@ export default function UsuarioSalonPage() {
     if (formReserva.tipo_alquiler === 'por_hora' && formReserva.hora_inicio && formReserva.hora_fin) {
       const [horaInicio, minInicio] = formReserva.hora_inicio.split(':').map(Number);
       const [horaFin, minFin] = formReserva.hora_fin.split(':').map(Number);
-      
+
       const minutosInicio = horaInicio * 60 + minInicio;
       const minutosFin = horaFin * 60 + minFin;
-      
+
       const diferencia = minutosFin - minutosInicio;
       const horas = Math.max(1, Math.ceil(diferencia / 60)); // Mínimo 1 hora
-      
+
       setFormReserva(prev => ({
         ...prev,
         cantidad: horas
@@ -207,7 +207,7 @@ export default function UsuarioSalonPage() {
       const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const day = String(selectedDate.getDate()).padStart(2, '0');
       const fechaFormato = `${year}-${month}-${day}`;
-      
+
       setFormReserva(prev => ({
         ...prev,
         fecha_inicio: fechaFormato,
@@ -306,10 +306,10 @@ export default function UsuarioSalonPage() {
   // Generar array de horas disponibles
   const generarHorasDisponibles = () => {
     if (!config) return [];
-    
+
     const [aperturaH, aperturaM] = config.hora_apertura.split(':').map(Number);
     const [cierreH, cierreM] = config.hora_cierre.split(':').map(Number);
-    
+
     const horas = [];
     for (let h = aperturaH; h <= cierreH; h++) {
       horas.push(String(h).padStart(2, '0'));
@@ -348,7 +348,7 @@ export default function UsuarioSalonPage() {
   // Actualizar cantidad de item en carrito
   const actualizarCantidadItem = (inventarioId: number, nuevaCantidad: number) => {
     if (nuevaCantidad <= 0 || nuevaCantidad > inventario.find((i) => i.id === inventarioId)?.cantidad!) return;
-    
+
     setItemsSeleccionados(
       itemsSeleccionados.map((i) =>
         i.inventario_id === inventarioId
@@ -394,10 +394,10 @@ export default function UsuarioSalonPage() {
     return reservas.some((r) => {
       const rStart = parseLocalDate(r.fecha_inicio);
       const rEnd = parseLocalDate(r.fecha_fin);
-      
+
       // Comparar solo fecha, sin hora
       const dateToCompare = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      
+
       return dateToCompare >= rStart && dateToCompare <= rEnd;
     });
   };
@@ -486,7 +486,7 @@ export default function UsuarioSalonPage() {
       {/* MIS ALQUILERES */}
       <div style={{ background: '#1e2a3a', padding: '2rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid #3a4a5f' }}>
         <h2 style={{ marginBottom: '1.5rem', color: '#fff' }}>📋 Mis Alquileres</h2>
-        
+
         {misAlquileres.length === 0 ? (
           <p style={{ color: '#a1aec6', textAlign: 'center', padding: '1rem' }}>No tienes alquileres registrados</p>
         ) : (
@@ -498,9 +498,8 @@ export default function UsuarioSalonPage() {
                   background: '#151d27',
                   padding: '1.5rem',
                   borderRadius: '6px',
-                  border: `1px solid ${
-                    alquiler.estado === 'confirmado' ? '#6c5ce7' : alquiler.estado === 'cancelado' ? '#c0392b' : '#3a4a5f'
-                  }`,
+                  border: `1px solid ${alquiler.estado === 'confirmado' ? '#6c5ce7' : alquiler.estado === 'cancelado' ? '#c0392b' : '#3a4a5f'
+                    }`,
                 }}
               >
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
@@ -513,26 +512,26 @@ export default function UsuarioSalonPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Horario</div>
                     <div style={{ color: '#fff', fontWeight: 'bold' }}>{alquiler.hora_inicio} - {alquiler.hora_fin}</div>
                   </div>
-                  
+
                   <div>
                     <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Tipo</div>
                     <div style={{ color: '#fff', fontWeight: 'bold' }}>
                       {alquiler.tipo_alquiler === 'por_hora' ? 'Por Hora' : 'Día Completo'}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Total</div>
                     <div style={{ color: '#6c5ce7', fontWeight: 'bold', fontSize: '1.1rem' }}>
                       ${alquiler.valor_total.toFixed(2)}
                     </div>
                   </div>
-                  
+
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <span
                       style={{
@@ -733,8 +732,8 @@ export default function UsuarioSalonPage() {
                   type="number"
                   min="1"
                   value={formReserva.cantidad}
-                  onChange={(e) => 
-                    formReserva.tipo_alquiler === 'por_dia' 
+                  onChange={(e) =>
+                    formReserva.tipo_alquiler === 'por_dia'
                       ? setFormReserva({ ...formReserva, cantidad: parseInt(e.target.value) })
                       : null
                   }
@@ -760,10 +759,10 @@ export default function UsuarioSalonPage() {
                   type="date"
                   value={formReserva.fecha_inicio}
                   onChange={(e) =>
-                    setFormReserva({ 
-                      ...formReserva, 
+                    setFormReserva({
+                      ...formReserva,
                       fecha_inicio: e.target.value,
-                      fecha_fin: e.target.value 
+                      fecha_fin: e.target.value
                     })
                   }
                   style={{
@@ -869,7 +868,7 @@ export default function UsuarioSalonPage() {
             {/* SECCIÓN DE ITEMS DEL INVENTARIO */}
             <div style={{ background: '#0f1419', padding: '1.5rem', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #3a4a5f' }}>
               <h4 style={{ marginBottom: '1rem', color: '#a1aec6' }}>📦 Artículos Disponibles para Alquilar</h4>
-              
+
               {inventario.length === 0 ? (
                 <p style={{ color: '#a1aec6', fontSize: '0.9rem' }}>No hay artículos disponibles para alquilar</p>
               ) : (
@@ -937,7 +936,7 @@ export default function UsuarioSalonPage() {
                         }}
                       >
                         <div style={{ color: '#a1aec6', minWidth: '120px' }}>{item.nombre}</div>
-                        
+
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <label style={{ color: '#a1aec6', fontSize: '0.85rem' }}>Cantidad:</label>
                           <input
@@ -960,12 +959,12 @@ export default function UsuarioSalonPage() {
                           />
                           <span style={{ color: '#a1aec6', fontSize: '0.85rem' }}>de {item.cantidad_disponible}</span>
                         </div>
-                        
+
                         <div style={{ textAlign: 'right', minWidth: '70px' }}>
                           <div style={{ color: '#a1aec6', fontSize: '0.85rem' }}>${item.valor_unitario}</div>
                           <div style={{ color: '#fff', fontWeight: 'bold' }}>${(item.cantidad_alquilada * item.valor_unitario).toFixed(2)}</div>
                         </div>
-                        
+
                         <button
                           type="button"
                           onClick={() => eliminarItem(item.inventario_id)}
