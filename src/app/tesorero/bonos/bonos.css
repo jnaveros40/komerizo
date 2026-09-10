@@ -1,0 +1,19 @@
+.bonos-page { max-width: 1280px; margin: 0 auto; padding: 2rem; color: #fff; }
+.bonos-tabs { display: flex; gap: .5rem; margin: 1.5rem 0; border-bottom: 1px solid #3a4a5f; }
+.bonos-tabs button, .bono-card button, .search-form button { border: 0; border-radius: 5px; padding: .7rem 1rem; background: #6c5ce7; color: #fff; cursor: pointer; }
+.bonos-tabs .active { background: #4d3cc6; }
+.bono-card { background: #1e2a3a; border: 1px solid #3a4a5f; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.bono-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.bono-form label, .bono-modal-card label, .search-form label { display: grid; gap: .4rem; color: #a1aec6; }
+.bono-form input, .bono-form textarea, .bono-form select, .bono-modal-card select, .search-form input { width: 100%; border: 1px solid #3a4a5f; border-radius: 4px; background: #0f1419; color: #fff; padding: .7rem; }
+.bono-form textarea { min-height: 70px; }
+.bono-heading, .purchase-row { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.position-counters { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; color: #c8d2e0; }
+.position-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: .4rem; }
+.position { min-height: 56px; background: #203b4a !important; border: 1px solid #4a7184 !important; display: grid; place-items: center; padding: .35rem !important; }
+.position small { font-size: .62rem; }
+.position.pagado { background: #245c3d !important; }.position.reservado { background: #765b25 !important; }.position:disabled { opacity: .9; cursor: not-allowed; }.position.selected { outline: 3px solid #fff; }
+.purchase-row { border-top: 1px solid #3a4a5f; padding: 1rem 0; }.purchase-row span { display: block; color: #a1aec6; margin-top: .3rem; }.purchase-row > div:last-child { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: end; }
+.bono-modal { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.65); z-index: 20; }.bono-modal-card { width: min(460px, calc(100% - 2rem)); background: #1e2a3a; border: 1px solid #3a4a5f; border-radius: 8px; padding: 1.5rem; display: grid; gap: .8rem; }.warning { color: #ffd666; }
+.search-form { display: flex; align-items: end; gap: .75rem; margin-bottom: 1rem; }.search-form label { flex: 1; }
+@media (max-width: 760px) { .bono-form { grid-template-columns: 1fr; }.bono-heading, .purchase-row { flex-direction: column; }.search-form { flex-direction: column; align-items: stretch; } }

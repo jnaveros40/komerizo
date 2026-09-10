@@ -22,9 +22,9 @@ export default function PresidenteSidebar({ user }: { user: any }) {
       icon: '📊',
     },
     {
-      label: 'Solicitudes',
-      href: '/presidente/solicitudes',
-      icon: '📋',
+      label: 'Egresos',
+      href: '/presidente/egresos',
+      icon: '💸',
     },
     {
       label: 'Reuniones',
@@ -35,16 +35,6 @@ export default function PresidenteSidebar({ user }: { user: any }) {
       label: 'Informes',
       href: '/presidente/informes',
       icon: '📄',
-    },
-    {
-      label: 'Miembros',
-      href: '/presidente/miembros',
-      icon: '👥',
-    },
-    {
-      label: 'Reportes',
-      href: '/presidente/reportes',
-      icon: '📈',
     },
   ]
 

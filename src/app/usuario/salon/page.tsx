@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-asserted-optional-chain */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -38,6 +39,11 @@ interface ItemAlquilerSeleccionado {
   valor_unitario: number;
   cantidad_disponible: number;
 }
+
+const timeToMinutes = (value: string): number => {
+  const [hours, minutes] = value.split(':').map(Number);
+  return hours * 60 + minutes;
+};
 
 export default function UsuarioSalonPage() {
   const [config, setConfig] = useState<SalonConfig | null>(null);
@@ -130,9 +136,13 @@ export default function UsuarioSalonPage() {
       setUsuario(userData);
 
       // Obtener rol actual del usuario
-      if (userData.roles && userData.roles.length > 0) {
-        setUserRole(userData.roles[0]);
-      }
+      const { data: assignedRoles } = await supabase
+        .from('komerizo_usuario_roles')
+        .select('rol_id, komerizo_roles(id, nombre)')
+        .eq('usuario_id', userData.id);
+      const roles = (assignedRoles || []).map((relation: any) => relation.komerizo_roles).filter(Boolean);
+      const actualRole = roles.find((role: any) => role.nombre === 'Usuario') || roles[0];
+      if (actualRole) setUserRole(actualRole);
 
       // Cargar configuración
       const { data: configData } = await supabase
@@ -224,18 +234,24 @@ export default function UsuarioSalonPage() {
     if (!config) return;
 
     try {
+      if (!usuario?.id || !userRole?.id) {
+        alert('No se encontró un rol válido para el usuario.');
+        return;
+      }
+
       // Validar disponibilidad usando parseLocalDate para mantener consistencia de timezone
       const reservasEnFecha = reservas.filter((r) => {
+        if (r.estado !== 'confirmado') return false;
         const rStart = parseLocalDate(r.fecha_inicio);
         const rEnd = parseLocalDate(r.fecha_fin);
         const formStart = parseLocalDate(formReserva.fecha_inicio);
         const formEnd = parseLocalDate(formReserva.fecha_fin);
-
-        return (
-          (formStart >= rStart && formStart <= rEnd) ||
-          (formEnd >= rStart && formEnd <= rEnd) ||
-          (rStart >= formStart && rStart <= formEnd)
-        );
+        if (formReserva.tipo_alquiler === 'por_dia' || r.tipo_alquiler === 'por_dia') {
+          return formStart <= rEnd && formEnd >= rStart;
+        }
+        if (formReserva.fecha_inicio !== r.fecha_inicio) return false;
+        return timeToMinutes(formReserva.hora_inicio) < timeToMinutes(r.hora_fin)
+          && timeToMinutes(formReserva.hora_fin) > timeToMinutes(r.hora_inicio);
       });
 
       if (reservasEnFecha.length > 0) {
@@ -244,47 +260,21 @@ export default function UsuarioSalonPage() {
       }
 
       // Calcular total: salón + items
-      const precioTotal = precioEstimado + precioItems;
-
-      const { data: alquilerData, error: errorAlquiler } = await supabase
-        .from('komerizo_alquileres')
-        .insert([
-          {
-            usuario_id: usuario.id,
-            rol_id: userRole?.id,
-            fecha_inicio: formReserva.fecha_inicio,
-            fecha_fin: formReserva.fecha_fin,
-            hora_inicio: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_inicio : config.hora_apertura,
-            hora_fin: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_fin : config.hora_cierre,
-            tipo_alquiler: formReserva.tipo_alquiler,
-            cantidad: formReserva.cantidad,
-            valor_total: precioTotal,
-            motivo: formReserva.motivo,
-            estado: 'confirmado',
-          },
-        ])
-        .select();
-
-      if (errorAlquiler) throw errorAlquiler;
-
-      // Guardar items seleccionados
-      if (alquilerData && alquilerData.length > 0 && itemsSeleccionados.length > 0) {
-        const alquilerId = alquilerData[0].id;
-
-        const itemsParaGuardar = itemsSeleccionados.map((item) => ({
-          alquiler_id: alquilerId,
+      const { error: reservationError } = await supabase.rpc('komerizo_crear_reserva_salon', {
+        p_usuario_id: usuario.id,
+        p_rol_id: userRole.id,
+        p_tipo_alquiler: formReserva.tipo_alquiler,
+        p_fecha_inicio: formReserva.fecha_inicio,
+        p_fecha_fin: formReserva.fecha_fin,
+        p_hora_inicio: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_inicio : null,
+        p_hora_fin: formReserva.tipo_alquiler === 'por_hora' ? formReserva.hora_fin : null,
+        p_motivo: formReserva.motivo,
+        p_items: itemsSeleccionados.map((item) => ({
           inventario_id: item.inventario_id,
-          cantidad_alquilada: item.cantidad_alquilada,
-          valor_unitario: item.valor_unitario,
-          valor_total: item.cantidad_alquilada * item.valor_unitario,
-        }));
-
-        const { error: errorItems } = await supabase
-          .from('komerizo_alquiler_items')
-          .insert(itemsParaGuardar);
-
-        if (errorItems) throw errorItems;
-      }
+          cantidad: item.cantidad_alquilada,
+        })),
+      });
+      if (reservationError) throw reservationError;
 
       alert('Reserva creada exitosamente');
       setShowFormReserva(false);
@@ -812,7 +802,7 @@ export default function UsuarioSalonPage() {
                     {generarHorasDisponibles().map((hora) => {
                       const horaCompleta = `${hora}:00`;
                       // Si hay hora de fin, evitar que hora inicio sea >= hora fin
-                      if (formReserva.hora_fin && horaCompleta >= formReserva.hora_fin) {
+                      if (formReserva.hora_fin && timeToMinutes(horaCompleta) >= timeToMinutes(formReserva.hora_fin)) {
                         return null;
                       }
                       return (
@@ -844,7 +834,7 @@ export default function UsuarioSalonPage() {
                     {generarHorasDisponibles().map((hora) => {
                       const horaCompleta = `${hora}:00`;
                       // Solo mostrar horas después de la hora de inicio
-                      if (formReserva.hora_inicio && horaCompleta <= formReserva.hora_inicio) {
+                      if (formReserva.hora_inicio && timeToMinutes(horaCompleta) <= timeToMinutes(formReserva.hora_inicio)) {
                         return null;
                       }
                       return (

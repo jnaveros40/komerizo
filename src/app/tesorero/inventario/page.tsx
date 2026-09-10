@@ -135,6 +135,7 @@ export default function TesoreroInventarioPage() {
   const [reportes, setReportes] = useState<Reporte[]>([]);
   const [loading, setLoading] = useState(true);
   const [usuario, setUsuario] = useState<any>(null);
+  const [tesoreroRoleId, setTesoreroRoleId] = useState<number | null>(null);
 
   // Cargar plugin autoTable cuando el componente monta
   useEffect(() => {
@@ -179,6 +180,13 @@ export default function TesoreroInventarioPage() {
       const user = JSON.parse(storedUser);
       setUsuario(user);
 
+      const { data: role } = await supabase
+        .from('komerizo_roles')
+        .select('id')
+        .eq('nombre', 'Tesorero')
+        .single();
+      setTesoreroRoleId(role?.id ?? null);
+
       // Cargar inventario
       const { data: inventarioData, error: inventarioError } = await supabase
         .from('komerizo_inventario')
@@ -218,7 +226,7 @@ export default function TesoreroInventarioPage() {
   const handleCrearItem = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nombre.trim() || formData.cantidad <= 0) {
+    if (!usuario?.id || !tesoreroRoleId || !formData.nombre.trim() || formData.cantidad <= 0) {
       alert('Por favor completa los campos requeridos');
       return;
     }
@@ -249,7 +257,7 @@ export default function TesoreroInventarioPage() {
         {
           inventario_id: newItem.id,
           usuario_id: usuario.id,
-          rol_id: 2, // Tesorero ID
+          rol_id: tesoreroRoleId,
           tipo_cambio: 'creacion',
           cantidad_nueva: formData.cantidad,
           valor_unitario_nueva: formData.valor_unitario,
@@ -272,7 +280,7 @@ export default function TesoreroInventarioPage() {
   const handleEditarItem = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!itemEditando || !formEditar.justificacion.trim()) {
+    if (!usuario?.id || !tesoreroRoleId || !itemEditando || !formEditar.justificacion.trim()) {
       alert('La justificación es obligatoria');
       return;
     }
@@ -283,7 +291,7 @@ export default function TesoreroInventarioPage() {
         {
           inventario_id: itemEditando.id,
           usuario_id: usuario.id,
-          rol_id: 2, // Tesorero
+          rol_id: tesoreroRoleId,
           tipo_cambio: 'modificacion',
           cantidad_anterior: itemEditando.cantidad,
           cantidad_nueva: formEditar.cantidad,

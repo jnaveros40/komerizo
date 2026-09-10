@@ -1,7 +1,9 @@
 'use client';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { downloadSalonInternalVoucher, downloadSalonReservationVoucher, downloadTreasuryReceipt } from '@/lib/financialReceipts';
 import '@/components/reuniones.css';
 
 interface SalonConfig {
@@ -27,6 +29,9 @@ interface Alquiler {
   valor_total: number;
   motivo: string;
   estado: string;
+  estado_pago: string;
+  metodo_pago: string | null;
+  tesoreria_movimiento_id: number | null;
   creado_at: string;
 }
 
@@ -47,6 +52,9 @@ export default function TesoreroSalonPage() {
 
   const [showFormConfig, setShowFormConfig] = useState(false);
   const [editingConfig, setEditingConfig] = useState(false);
+  const [paymentRental, setPaymentRental] = useState<Alquiler | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState('Efectivo');
+  const [treasurerRoleId, setTreasurerRoleId] = useState<number | null>(null);
 
   // Cargar datos
   useEffect(() => {
@@ -62,6 +70,13 @@ export default function TesoreroSalonPage() {
 
       const userData = JSON.parse(storedUser);
       setUsuario(userData);
+
+      const { data: treasurerRole } = await supabase
+        .from('komerizo_roles')
+        .select('id')
+        .eq('nombre', 'Tesorero')
+        .single();
+      if (treasurerRole) setTreasurerRoleId(treasurerRole.id);
 
       // Cargar configuración
       const { data: configData, error: configError } = await supabase
@@ -100,6 +115,11 @@ export default function TesoreroSalonPage() {
   const handleGuardarConfig = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!usuario?.id || !treasurerRoleId) {
+      alert('No se encontró el rol Tesorero.');
+      return;
+    }
+
     try {
       if (config) {
         // Actualizar configuración existente
@@ -122,7 +142,7 @@ export default function TesoreroSalonPage() {
         await supabase.from('komerizo_salon_historial').insert([
           {
             usuario_id: usuario.id,
-            rol_id: 2, // Tesorero
+            rol_id: treasurerRoleId,
             valor_anterior: {
               valor_por_hora: config.valor_por_hora,
               valor_por_dia: config.valor_por_dia,
@@ -169,6 +189,8 @@ export default function TesoreroSalonPage() {
     if (!confirm('¿Deseas cancelar esta reserva?')) return;
 
     try {
+      const target = alquileres.find(item => item.id === alquilerId);
+      if (target?.estado_pago === 'completado') { alert('La reserva ya fue pagada y no puede cancelarse desde este flujo.'); return; }
       const { error } = await supabase
         .from('komerizo_alquileres')
         .update({ estado: 'cancelado', actualizado_at: new Date().toISOString() })
@@ -195,10 +217,7 @@ export default function TesoreroSalonPage() {
     if (!confirm('¿Deseas marcar esta reserva como Consumo Interno? El valor total pasará a $0.')) return;
 
     try {
-      const { error } = await supabase
-        .from('komerizo_alquileres')
-        .update({ valor_total: 0, actualizado_at: new Date().toISOString() })
-        .eq('id', alquilerId);
+      const { error } = await supabase.rpc('komerizo_marcar_salon_consumo_interno', { p_alquiler_id: alquilerId, p_tesorero_id: usuario.id });
 
       if (error) throw error;
 
@@ -208,6 +227,14 @@ export default function TesoreroSalonPage() {
       console.error('Error actualizando alquiler:', error);
       alert('Error al actualizar la reserva');
     }
+  };
+
+  const handleConfirmarPago = async () => {
+    if (!paymentRental || !usuario?.id) return;
+    if (!treasurerRoleId) { alert('No se encontró el rol Tesorero.'); return; }
+    const { error } = await supabase.rpc('komerizo_confirmar_pago_salon', { p_alquiler_id: paymentRental.id, p_tesorero_id: usuario.id, p_tesorero_rol_id: treasurerRoleId, p_metodo_pago: paymentMethod });
+    if (error) { alert(error.message); return; }
+    setPaymentRental(null); await loadData();
   };
 
   if (loading) {
@@ -466,6 +493,20 @@ export default function TesoreroSalonPage() {
                     )}
                   </div>
 
+                  <div className="reunion-meta">
+                    <div className="meta-item"><b>Estado de reserva:</b> {alquiler.estado}</div>
+                    <div className="meta-item"><b>Estado de pago:</b> {alquiler.estado_pago || (alquiler.valor_total === 0 ? 'exonerado' : 'pendiente')}</div>
+                    <div className="meta-item"><b>Valor:</b> ${Number(alquiler.valor_total).toFixed(2)}</div>
+                    <div className="meta-item"><b>Método de pago:</b> {alquiler.metodo_pago || '-'}</div>
+                  </div>
+
+                  {alquiler.estado === 'confirmado' && alquiler.estado_pago === 'pendiente' && alquiler.valor_total > 0 && (
+                    <button onClick={() => { setPaymentRental(alquiler); setPaymentMethod('Efectivo') }}>Confirmar pago</button>
+                  )}
+                  {alquiler.estado_pago === 'pendiente' && <button onClick={() => downloadSalonReservationVoucher(alquiler)}>Comprobante de reserva</button>}
+                  {alquiler.estado_pago === 'completado' && <button onClick={async () => { const { data } = await supabase.from('komerizo_tesoreria').select('*').eq('id', alquiler.tesoreria_movimiento_id).single(); if (data) downloadTreasuryReceipt({ ...data, pagador: `Reserva de salón #${alquiler.id}`, responsable: `${usuario?.nombre || ''} ${usuario?.apellido || ''}`.trim() }) }}>Descargar recibo de pago</button>}
+                  {alquiler.estado_pago === 'exonerado' && <button onClick={() => downloadSalonInternalVoucher(alquiler)}>Comprobante de consumo interno</button>}
+
                   {alquiler.estado === 'confirmado' && (
                     <div className="reunion-acciones" style={{ display: 'flex', gap: '1rem' }}>
                       {alquiler.valor_total > 0 && (
@@ -504,6 +545,7 @@ export default function TesoreroSalonPage() {
           )}
         </div>
       )}
+    {paymentRental && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', display: 'grid', placeItems: 'center', zIndex: 10 }}><div style={{ background: '#1e2a3a', padding: '1.5rem', display: 'grid', gap: '.8rem' }}><h2>Confirmar pago</h2><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}><option>Efectivo</option><option>Transferencia</option><option>Cheque</option><option>Otro</option></select><button onClick={handleConfirmarPago}>Confirmar</button><button onClick={() => setPaymentRental(null)}>Cancelar</button></div></div>}
     </div>
   );
 }

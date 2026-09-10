@@ -1,0 +1,29 @@
+.financial-page { padding: 2rem; max-width: 1500px; margin: 0 auto; color: #fff; }
+.financial-page h1 { margin-bottom: .4rem; }
+.threshold { color: #c8d2e3; margin-bottom: 1.5rem; }
+.financial-card { background: #1e2a3a; border: 1px solid #3a4a5f; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.financial-card h2 { margin-top: 0; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.financial-page label { display: flex; flex-direction: column; gap: .4rem; color: #c8d2e3; margin-bottom: 1rem; }
+.financial-page input, .financial-page select, .financial-page textarea { width: 100%; box-sizing: border-box; background: #0f1419; color: #fff; border: 1px solid #46566c; border-radius: 5px; padding: .7rem; font: inherit; }
+.financial-page textarea { min-height: 90px; resize: vertical; }
+.file-field { min-height: 72px; }
+.financial-page button { background: #6c5ce7; color: #fff; border: 0; border-radius: 5px; padding: .7rem 1rem; cursor: pointer; font-weight: 600; }
+.financial-page button:disabled { opacity: .6; cursor: wait; }
+.financial-page button.secondary { background: #46566c; }
+.notice { padding: .8rem 1rem; border-radius: 5px; margin: 1rem 0; }
+.notice.success { background: #153c2b; color: #9cf0bc; }
+.notice.warning { background: #4b3516; color: #ffd68a; }
+.table-wrap { overflow-x: auto; }
+.financial-page table { border-collapse: collapse; width: 100%; min-width: 1100px; }
+.financial-page th, .financial-page td { padding: .7rem; border-bottom: 1px solid #3a4a5f; text-align: left; vertical-align: top; }
+.financial-page th { color: #aab7cc; font-size: .85rem; }
+.financial-page td { color: #e8edf5; }
+.financial-page td small { display: block; color: #ffd68a; margin-top: .35rem; max-width: 230px; }
+.financial-page a { color: #9bb5ff; }
+.status { display: inline-block; padding: .3rem .5rem; border-radius: 99px; font-size: .8rem; white-space: nowrap; background: #46566c; }
+.status.pendiente_tesoreria { background: #735a19; color: #ffe49a; }.status.devuelto_presidente { background: #6a2730; color: #ffc1c8; }.status.reenviado_tesoreria { background: #284f71; color: #b7ddff; }.status.registrado { background: #1d5a3b; color: #b1f2c8; }.status.alertado_fiscal { background: #652d6f; color: #f0c6ff; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: grid; place-items: center; padding: 1rem; z-index: 10; }
+.modal-card { background: #1e2a3a; border: 1px solid #52647c; border-radius: 10px; padding: 1.5rem; width: min(850px, 100%); max-height: 90vh; overflow: auto; }
+.actions { display: flex; gap: .75rem; }
+@media (max-width: 700px) { .financial-page { padding: 1rem; }.form-grid { grid-template-columns: 1fr; } }

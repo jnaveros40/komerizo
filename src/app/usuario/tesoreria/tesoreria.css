@@ -176,3 +176,11 @@
   font-size: 0.9rem;
   font-style: italic;
 }
+.estadisticas-section { margin: 1.5rem 0; color: #fff; }
+.statistics-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.statistics-heading select { background: #1e2a3a; color: #fff; border: 1px solid #3a4a5f; padding: .6rem; border-radius: 4px; }
+.statistics-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1rem 0; }
+.statistics-cards > div, .comparison-card, .monthly-bars, .breakdown-grid > div { background: #1e2a3a; border: 1px solid #3a4a5f; border-radius: 8px; padding: 1rem; }
+.statistics-cards span, .statistics-cards strong { display: block; }.statistics-cards span, .comparison-card p, .breakdown-grid p { color: #a1aec6; }.statistics-cards strong { font-size: 1.25rem; margin-top: .5rem; color: #fff; }
+.monthly-bars { margin-top: 1rem; }.month-row { display: grid; grid-template-columns: 70px 1fr 1fr; gap: .75rem; align-items: center; margin: .8rem 0; }.month-row div { min-width: 0; }.month-row span { display: block; color: #c8d2e0; font-size: .85rem; }.month-row i { display: block; height: 10px; background: #52c41a; border-radius: 4px; }.month-row i.expense-bar { background: #ff7875; }.breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }.breakdown-grid p { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #3a4a5f; padding-bottom: .5rem; }
+@media (max-width: 800px) { .statistics-cards, .breakdown-grid { grid-template-columns: 1fr 1fr; } } @media (max-width: 560px) { .statistics-cards, .breakdown-grid { grid-template-columns: 1fr; }.month-row { grid-template-columns: 55px 1fr; }.month-row > div:last-child { grid-column: 2; } }

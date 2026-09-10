@@ -22,11 +22,6 @@ export default function FiscalSidebar({ user }: { user: any }) {
       icon: '📊',
     },
     {
-      label: 'Solicitudes',
-      href: '/fiscal/solicitudes',
-      icon: '📋',
-    },
-    {
       label: 'Reuniones',
       href: '/fiscal/reuniones',
       icon: '📅',
@@ -45,11 +40,6 @@ export default function FiscalSidebar({ user }: { user: any }) {
       label: 'Reportes',
       href: '/fiscal/reportes',
       icon: '📈',
-    },
-    {
-      label: 'Miembros',
-      href: '/fiscal/miembros',
-      icon: '👥',
     },
   ]
 

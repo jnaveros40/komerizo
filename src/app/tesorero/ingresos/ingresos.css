@@ -1,0 +1,21 @@
+.income-page { max-width: 1200px; margin: 0 auto; padding: 2rem; color: #fff; }
+.income-tabs { display: flex; gap: .5rem; border-bottom: 1px solid #33445a; margin-bottom: 1.5rem; }
+.income-tabs button, .income-page button { border: 0; border-radius: 5px; padding: .65rem 1rem; cursor: pointer; background: #5367d9; color: #fff; }
+.income-tabs button { background: transparent; border-radius: 0; }
+.income-tabs button.active { border-bottom: 2px solid #7c8cff; color: #aeb7ff; }
+.income-card { background: #1e2a3a; border: 1px solid #344761; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
+.income-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.income-page label { display: flex; flex-direction: column; gap: .35rem; color: #bac5d8; margin: .7rem 0; }
+.income-page input, .income-page select, .income-page textarea { background: #0f1419; border: 1px solid #46566c; border-radius: 4px; color: #fff; padding: .65rem; font: inherit; }
+.income-page textarea { min-height: 80px; }
+.resource-list { display: grid; gap: .5rem; margin-bottom: 1rem; }
+.resource-row { flex-direction: row !important; align-items: center; justify-content: space-between; padding: .7rem; background: #162130; border-radius: 5px; }
+.resource-row small, .income-row span { display: block; color: #aab6c9; margin-top: .25rem; }
+.resource-row input { width: 90px; }
+.check { flex-direction: row !important; align-items: center; }
+.check input { width: auto; }
+.income-row { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-top: 1px solid #344761; }
+.row-actions { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; align-content: center; }
+.income-modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: grid; place-items: center; padding: 1rem; z-index: 10; }
+.modal-box { width: min(430px, 100%); display: grid; gap: .8rem; background: #1e2a3a; border: 1px solid #526684; border-radius: 8px; padding: 1.25rem; }
+@media (max-width: 800px) { .income-grid { grid-template-columns: 1fr; } .income-row { flex-direction: column; } .row-actions { justify-content: flex-start; } }

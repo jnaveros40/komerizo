@@ -22,11 +22,6 @@ export default function SecretarioSidebar({ user }: { user: any }) {
       icon: '📊',
     },
     {
-      label: 'Solicitudes',
-      href: '/secretario/solicitudes',
-      icon: '📋',
-    },
-    {
       label: 'Reuniones',
       href: '/secretario/reuniones',
       icon: '📅',
