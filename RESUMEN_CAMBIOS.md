@@ -1,4 +1,4 @@
-# ✅ Resumen de Cambios - Sistema de Login Komerizo
+# ✅ Resumen de Cambios - Sistema de Login komirezo
 
 ## 📁 Archivos Creados
 

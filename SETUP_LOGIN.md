@@ -1,4 +1,4 @@
-# 📋 Configuración del Sistema de Login - Komerizo
+# 📋 Configuración del Sistema de Login - komirezo
 
 ## 1️⃣ Pasos de Implementación
 

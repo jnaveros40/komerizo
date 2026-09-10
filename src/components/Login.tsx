@@ -139,7 +139,7 @@ export default function Login() {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1 className="login-title">🔐 Komerizo</h1>
+        <h1 className="login-title">🔐 komirezo</h1>
         <p className="login-subtitle">Plataforma de Gestión de Comunales</p>
 
         <form onSubmit={handleLogin} className="login-form">

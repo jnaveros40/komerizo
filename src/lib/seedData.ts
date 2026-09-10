@@ -1,5 +1,5 @@
 /**
- * Script para insertar datos iniciales en Komerizo
+ * Script para insertar datos iniciales en komirezo
  * Ejecutar desde la consola de Supabase o mediante una función
  */
 

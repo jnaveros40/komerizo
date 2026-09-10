@@ -390,8 +390,8 @@ export default function UsuarioSalonPage() {
     }
   };
 
-  const isDateReserved = (date: Date) => {
-    return reservas.some((r) => {
+  const getReservationsForDate = (date: Date) => {
+    return reservas.filter((r) => {
       const rStart = parseLocalDate(r.fecha_inicio);
       const rEnd = parseLocalDate(r.fecha_fin);
 
@@ -415,26 +415,39 @@ export default function UsuarioSalonPage() {
     // Días del mes
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-      const reserved = isDateReserved(date);
+      const dateReservations = getReservationsForDate(date);
+      const isReserved = dateReservations.length > 0;
+      const isFullDayReserved = dateReservations.some(r => r.tipo_alquiler === 'por_dia');
       const isSelected = selectedDate?.toDateString() === date.toDateString();
 
       days.push(
         <div
           key={day}
-          onClick={() => setSelectedDate(date)}
+          onClick={isFullDayReserved ? undefined : () => setSelectedDate(date)}
           style={{
             padding: '1rem',
-            background: isSelected ? '#6c5ce7' : reserved ? '#c0392b' : '#1e2a3a',
-            color: reserved ? '#fff' : '#a1aec6',
+            background: isSelected ? '#6c5ce7' : isFullDayReserved ? '#c0392b' : isReserved ? '#f39c12' : '#1e2a3a',
+            color: (isFullDayReserved || isReserved) ? '#fff' : '#a1aec6',
             border: '1px solid #3a4a5f',
-            cursor: 'pointer',
+            cursor: isFullDayReserved ? 'not-allowed' : 'pointer',
             borderRadius: '4px',
             textAlign: 'center',
             fontWeight: isSelected ? 'bold' : 'normal',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.25rem',
+            minHeight: '85px',
           }}
         >
           <div>{day}</div>
-          {reserved && <div style={{ fontSize: '0.7rem' }}>Reservado</div>}
+          {isFullDayReserved && <div style={{ fontSize: '0.7rem', color: '#ffcdcc' }}>Reservado todo el día</div>}
+          {!isFullDayReserved && isReserved && (
+            <div style={{ fontSize: '0.75rem', color: '#fff3e0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              {dateReservations.map(r => (
+                <div key={r.id}>{r.hora_inicio} - {r.hora_fin}</div>
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -663,14 +676,18 @@ export default function UsuarioSalonPage() {
         {/* Días del calendario */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>{renderCalendar()}</div>
 
-        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '2rem', fontSize: '0.9rem' }}>
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '2rem', fontSize: '0.9rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{ width: '20px', height: '20px', background: '#6c5ce7', borderRadius: '4px' }}></div>
             <span style={{ color: '#a1aec6' }}>Seleccionado</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{ width: '20px', height: '20px', background: '#c0392b', borderRadius: '4px' }}></div>
-            <span style={{ color: '#a1aec6' }}>Reservado</span>
+            <span style={{ color: '#a1aec6' }}>Reservado todo el día</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ width: '20px', height: '20px', background: '#f39c12', borderRadius: '4px' }}></div>
+            <span style={{ color: '#a1aec6' }}>Reservado por horas</span>
           </div>
         </div>
       </div>

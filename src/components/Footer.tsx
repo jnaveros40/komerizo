@@ -22,7 +22,7 @@ const Footer = () => {
             🚀
           </div>
           <div className="brand-text">
-            <h3>Komerizo</h3>
+            <h3>komirezo</h3>
             <p>Software de Juntas de Accion Comunal</p>
           </div>
         </div>
@@ -32,8 +32,8 @@ const Footer = () => {
           <div className="developer-card">
             {/* Logo IngNavs */}
             <div className="developer-logo">
-              <img 
-                src="/IngNavs.png" 
+              <img
+                src="/IngNavs.png"
                 alt="IngNavs Logo"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -93,7 +93,7 @@ const Footer = () => {
             © {new Date().getFullYear()} Todos los derechos reservados
           </p>
           <p className="footer-entity">
-            Komerizo
+            komirezo
           </p>
         </div>
       </div>
