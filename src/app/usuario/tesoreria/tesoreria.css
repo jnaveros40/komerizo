@@ -56,6 +56,26 @@
   font-size: 1.3rem;
 }
 
+.movement-filters {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+
+.movement-filters button {
+  border: 1px solid #dfe6e9;
+  background: #fff;
+  color: #2c3e50;
+  padding: .55rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.movement-filters button.active {
+  background: #2c3e50;
+  color: #fff;
+}
+
 .table-responsive {
   overflow-x: auto;
 }

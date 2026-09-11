@@ -130,6 +130,9 @@ CREATE TABLE IF NOT EXISTS komerizo_solicitudes_configuracion_jac (
   resolved_at TIMESTAMPTZ
 );
 
+ALTER TABLE IF EXISTS komerizo_configuracion_jac
+  ADD COLUMN IF NOT EXISTS motivo_actualizacion TEXT;
+
 ALTER TABLE IF EXISTS komerizo_solicitud_informes
   ADD COLUMN IF NOT EXISTS destinatario_id BIGINT DEFAULT 0,
   ADD COLUMN IF NOT EXISTS movimiento_tesoreria_id BIGINT
@@ -349,19 +352,84 @@ BEGIN
     UPDATE komerizo_configuracion_jac
     SET tope_gasto_presidente = v_request.tope_gasto_presidente,
         tope_gasto_junta = v_request.tope_gasto_junta,
+        motivo_actualizacion = v_request.motivo,
         actualizado_por = p_administrador_id,
         fecha_actualizacion = NOW()
     WHERE id = v_config.id;
   ELSE
     INSERT INTO komerizo_configuracion_jac
-      (tope_gasto_presidente, tope_gasto_junta, actualizado_por, fecha_actualizacion)
+      (tope_gasto_presidente, tope_gasto_junta, motivo_actualizacion, actualizado_por, fecha_actualizacion)
     VALUES (v_request.tope_gasto_presidente, v_request.tope_gasto_junta,
-            p_administrador_id, NOW());
+            v_request.motivo, p_administrador_id, NOW());
   END IF;
 
   UPDATE komerizo_solicitudes_configuracion_jac
   SET estado = 'aplicada', administrador_id = p_administrador_id, resolved_at = NOW()
   WHERE id = v_request.id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION komerizo_fijar_cuantias_administrador(
+  p_administrador_id BIGINT,
+  p_tope_gasto_presidente DECIMAL,
+  p_tope_gasto_junta DECIMAL,
+  p_motivo TEXT
+) RETURNS VOID
+LANGUAGE plpgsql AS $$
+DECLARE
+  v_config komerizo_configuracion_jac%ROWTYPE;
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM komerizo_usuario_roles ur
+    JOIN komerizo_roles r ON r.id = ur.rol_id
+    WHERE ur.usuario_id = p_administrador_id
+      AND r.nombre = 'Administrador'
+  ) THEN
+    RAISE EXCEPTION 'El usuario indicado no tiene el rol Administrador';
+  END IF;
+
+  IF p_tope_gasto_presidente IS NULL OR p_tope_gasto_presidente <= 0 THEN
+    RAISE EXCEPTION 'La cuantía del Presidente debe ser mayor que cero';
+  END IF;
+  IF p_tope_gasto_junta IS NULL OR p_tope_gasto_junta <= 0 THEN
+    RAISE EXCEPTION 'La cuantía de la Junta debe ser mayor que cero';
+  END IF;
+  IF p_tope_gasto_junta < p_tope_gasto_presidente THEN
+    RAISE EXCEPTION 'La cuantía de Junta debe ser mayor o igual a la de Presidencia';
+  END IF;
+  IF COALESCE(BTRIM(p_motivo), '') = '' THEN
+    RAISE EXCEPTION 'El motivo de la actualización es obligatorio';
+  END IF;
+
+  -- Serializa los cambios directos y evita dos inserciones iniciales concurrentes.
+  PERFORM pg_advisory_xact_lock(42001002);
+
+  SELECT * INTO v_config
+  FROM komerizo_configuracion_jac
+  ORDER BY id DESC
+  LIMIT 1
+  FOR UPDATE;
+
+  IF FOUND THEN
+    UPDATE komerizo_configuracion_jac
+    SET tope_gasto_presidente = p_tope_gasto_presidente,
+        tope_gasto_junta = p_tope_gasto_junta,
+        motivo_actualizacion = BTRIM(p_motivo),
+        actualizado_por = p_administrador_id,
+        fecha_actualizacion = NOW()
+    WHERE id = v_config.id;
+  ELSE
+    INSERT INTO komerizo_configuracion_jac
+      (tope_gasto_presidente, tope_gasto_junta, motivo_actualizacion, actualizado_por, fecha_actualizacion)
+    VALUES (
+      p_tope_gasto_presidente,
+      p_tope_gasto_junta,
+      BTRIM(p_motivo),
+      p_administrador_id,
+      NOW()
+    );
+  END IF;
 END;
 $$;
 

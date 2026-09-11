@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+tests/phase2-api/results/*.json
+tests/phase2-api/results/*.md
 
 # next.js
 /.next/

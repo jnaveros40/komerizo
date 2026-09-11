@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:phase2:api": "node --env-file=.env.local --test --test-concurrency=1 tests/phase2-api/*.test.mjs",
+    "test:phase2:api:connectivity": "node --env-file=.env.local --test --test-concurrency=1 tests/phase2-api/00-connectivity.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",

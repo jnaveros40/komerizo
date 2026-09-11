@@ -183,6 +183,20 @@ BEGIN
   IF p_deposito_garantia IS NULL OR p_deposito_garantia < 0 THEN RAISE EXCEPTION 'El depósito no puede ser negativo'; END IF;
   IF COALESCE(BTRIM(p_clausulas_uso), '') = '' THEN RAISE EXCEPTION 'Las cláusulas de uso son obligatorias'; END IF;
   IF COALESCE(jsonb_typeof(p_items), '') <> 'array' OR jsonb_array_length(p_items) = 0 THEN RAISE EXCEPTION 'Debe seleccionar al menos un recurso'; END IF;
+  IF p_exonerado_pago AND p_tipo_arrendatario = 'externo' THEN
+    RAISE EXCEPTION 'Los arrendatarios externos no pueden ser exonerados del pago';
+  END IF;
+  IF p_exonerado_pago AND p_tipo_arrendatario = 'afiliado' AND NOT EXISTS (
+    SELECT 1
+    FROM komerizo_usuarios u
+    JOIN komerizo_usuario_roles ur ON ur.usuario_id = u.id
+    JOIN komerizo_roles r ON r.id = ur.rol_id
+    WHERE u.id = p_usuario_arrendatario_id
+      AND u.estado = 'activo'
+      AND r.nombre IN ('Usuario', 'Miembro')
+  ) THEN
+    RAISE EXCEPTION 'La exoneración requiere un afiliado activo válido';
+  END IF;
   IF p_exonerado_pago AND (COALESCE(BTRIM(p_justificacion_exoneracion), '') = '' OR p_deposito_garantia <> 0) THEN
     RAISE EXCEPTION 'La exoneración requiere justificación y depósito en cero';
   END IF;

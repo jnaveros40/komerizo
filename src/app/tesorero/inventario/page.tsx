@@ -128,9 +128,18 @@ interface Reporte {
   fecha_generacion: string;
 }
 
+function getLocalDateString(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
 export default function TesoreroInventarioPage() {
   const [tab, setTab] = useState<'inventario' | 'historial' | 'reportes'>('inventario');
   const [inventario, setInventario] = useState<InventarioItem[]>([]);
+  const [comprometidasHoy, setComprometidasHoy] = useState<Record<number, number>>({});
   const [historial, setHistorial] = useState<HistorialCambio[]>([]);
   const [reportes, setReportes] = useState<Reporte[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,6 +205,35 @@ export default function TesoreroInventarioPage() {
 
       if (inventarioError) throw inventarioError;
       setInventario(inventarioData || []);
+
+      const today = getLocalDateString();
+      const [resourceItemsResult, resourceRentalsResult, salonItemsResult, salonRentalsResult] = await Promise.all([
+        supabase.from('komerizo_alquiler_recursos_items').select('inventario_id,cantidad_alquilada,alquiler_id'),
+        supabase.from('komerizo_alquiler_recursos').select('id,fecha_inicio,fecha_fin,estado_alquiler').in('estado_alquiler', ['pendiente', 'activo']),
+        supabase.from('komerizo_alquiler_items').select('inventario_id,cantidad_alquilada,alquiler_id'),
+        supabase.from('komerizo_alquileres').select('id,fecha_inicio,fecha_fin,estado').eq('estado', 'confirmado'),
+      ]);
+      const availabilityErrors = [resourceItemsResult.error, resourceRentalsResult.error, salonItemsResult.error, salonRentalsResult.error].filter(Boolean);
+      if (availabilityErrors.length) throw availabilityErrors[0];
+
+      const activeResourceRentals = new Map((resourceRentalsResult.data || [])
+        .filter(rental => rental.fecha_inicio <= today && rental.fecha_fin >= today)
+        .map(rental => [rental.id, rental]));
+      const activeSalonRentals = new Map((salonRentalsResult.data || [])
+        .filter(rental => rental.fecha_inicio <= today && (!rental.fecha_fin || rental.fecha_fin >= today))
+        .map(rental => [rental.id, rental]));
+      const committed: Record<number, number> = {};
+      (resourceItemsResult.data || []).forEach(item => {
+        if (activeResourceRentals.has(item.alquiler_id)) {
+          committed[item.inventario_id] = (committed[item.inventario_id] || 0) + Number(item.cantidad_alquilada || 0);
+        }
+      });
+      (salonItemsResult.data || []).forEach(item => {
+        if (activeSalonRentals.has(item.alquiler_id)) {
+          committed[item.inventario_id] = (committed[item.inventario_id] || 0) + Number(item.cantidad_alquilada || 0);
+        }
+      });
+      setComprometidasHoy(committed);
 
       // Cargar historial (últimos 50)
       const { data: historialData, error: historialError } = await supabase
@@ -916,7 +954,12 @@ export default function TesoreroInventarioPage() {
                 <h3>No hay items en inventario</h3>
               </div>
             ) : (
-              inventario.map((item) => (
+              inventario.map((item) => {
+                const comprometido = Number(comprometidasHoy[item.id] || 0);
+                const disponible = Math.max(Number(item.cantidad) - comprometido, 0);
+                const disponibilidad = comprometido === 0 ? 'Disponible' : disponible > 0 ? 'Parcialmente alquilado' : 'Sin disponibilidad';
+                const disponibilidadClass = comprometido === 0 ? 'disponible' : disponible > 0 ? 'parcialmente-alquilado' : 'sin-disponibilidad';
+                return (
                 <div key={item.id} className="reunion-card">
                   <div className="reunion-header">
                     <div style={{ flex: 1 }}>
@@ -924,13 +967,24 @@ export default function TesoreroInventarioPage() {
                       <span className="reunion-tipo">{item.categoria}</span>
                     </div>
                     <span className={`estado-badge ${item.estado}`}>{item.estado.toUpperCase()}</span>
+                    {item.es_alquilable && <span className={`estado-badge ${disponibilidadClass}`}>{disponibilidad}</span>}
                   </div>
 
                   <div className="reunion-meta">
                     <div className="meta-item">
                       <span className="meta-icon">📊</span>
-                      {item.cantidad} {item.unidad}
+                      {item.es_alquilable ? <>Total: {item.cantidad} {item.unidad}</> : <>{item.cantidad} {item.unidad}</>}
                     </div>
+                    {item.es_alquilable && <>
+                      <div className="meta-item">
+                        <span className="meta-icon">📌</span>
+                        Comprometido hoy: {comprometido} {item.unidad}
+                      </div>
+                      <div className="meta-item">
+                        <span className="meta-icon">✅</span>
+                        Disponible hoy: {disponible} {item.unidad}
+                      </div>
+                    </>}
                     <div className="meta-item">
                       <span className="meta-icon">💰</span>${item.valor_unitario}
                     </div>
@@ -969,7 +1023,8 @@ export default function TesoreroInventarioPage() {
                     </button>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
