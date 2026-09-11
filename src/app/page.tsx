@@ -33,10 +33,10 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         minHeight: '100vh',
         fontSize: '1.5rem'
       }}>
@@ -61,9 +61,9 @@ const Home = () => {
   return (
     <div className="main-content">
       {/* Header con botón de cerrar sesión */}
-      <div style={{ 
-        position: 'absolute', 
-        top: '1rem', 
+      <div style={{
+        position: 'absolute',
+        top: '1rem',
         right: '1rem',
         display: 'flex',
         gap: '1rem',
@@ -72,7 +72,7 @@ const Home = () => {
         <span style={{ fontSize: '0.875rem', color: '#666' }}>
           {user.email}
         </span>
-        <button 
+        <button
           onClick={signOut}
           style={{
             padding: '0.5rem 1rem',
@@ -96,13 +96,13 @@ const Home = () => {
         </div>
         <h1 className="hero-title">
           Bienvenido a
-          <span className="gradient-text"> Komerizo</span>
+          <span className="gradient-text"> komirezo</span>
         </h1>
         <p className="hero-subtitle">
           Sistema integral de gestión comercial que potencia tu negocio
           con herramientas modernas y análisis en tiempo real
         </p>
-        
+
         <div className="hero-buttons">
           <button className="btn-primary">
             Iniciar Venta

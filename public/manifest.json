@@ -1,6 +1,6 @@
 {
-  "name": "Komerizo - Sistema de Gestión Comercial",
-  "short_name": "Komerizo",
+  "name": "komirezo - Sistema de Gestión Comercial",
+  "short_name": "komirezo",
   "description": "Plataforma integral para gestión de ventas, inventario y clientes",
   "start_url": "/",
   "display": "standalone",
@@ -45,7 +45,11 @@
       "purpose": "any"
     }
   ],
-  "categories": ["business", "productivity", "finance"],
+  "categories": [
+    "business",
+    "productivity",
+    "finance"
+  ],
   "screenshots": [],
   "share_target": {
     "action": "/share",

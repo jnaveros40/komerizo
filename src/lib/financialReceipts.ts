@@ -5,7 +5,7 @@ const money = (value: unknown) => new Intl.NumberFormat('es-CO', { style: 'curre
 
 const addHeader = (pdf: jsPDF, title: string) => {
   pdf.setFontSize(18)
-  pdf.text('Komerizo', 20, 22)
+  pdf.text('komirezo', 20, 22)
   pdf.setFontSize(11)
   pdf.text('Junta de Acción Comunal', 20, 30)
   pdf.setFontSize(15)
@@ -64,11 +64,11 @@ export function downloadRentalVoucher(data: any) {
   pdf.text('Recursos', 20, y + 2)
   pdf.setFont('helvetica', 'normal')
   y += 10
-  ;(data.items || []).forEach((item: any) => {
-    const name = item.nombre || item.komerizo_inventario?.nombre || item.inventario?.nombre || 'Recurso'
-    pdf.text(`${name} · ${item.cantidad_alquilada ?? item.cantidad ?? 0} · ${money(item.valor_total)}`, 25, y)
-    y += 7
-  })
+    ; (data.items || []).forEach((item: any) => {
+      const name = item.nombre || item.komerizo_inventario?.nombre || item.inventario?.nombre || 'Recurso'
+      pdf.text(`${name} · ${item.cantidad_alquilada ?? item.cantidad ?? 0} · ${money(item.valor_total)}`, 25, y)
+      y += 7
+    })
   y += 6
   pdf.setFont('helvetica', 'bold')
   pdf.text('Cláusulas de uso', 20, y)
@@ -93,11 +93,11 @@ export function downloadSalonReservationVoucher(data: any) {
   pdf.text('Recursos adicionales', 20, y + 2)
   pdf.setFont('helvetica', 'normal')
   y += 10
-  ;(data.items || data.komerizo_alquiler_items || []).forEach((item: any) => {
-    const name = item.nombre || item.komerizo_inventario?.nombre || item.inventario?.nombre || 'Recurso'
-    pdf.text(`${name} · ${item.cantidad_alquilada ?? item.cantidad ?? 0} · ${money(item.valor_total)}`, 25, y)
-    y += 7
-  })
+    ; (data.items || data.komerizo_alquiler_items || []).forEach((item: any) => {
+      const name = item.nombre || item.komerizo_inventario?.nombre || item.inventario?.nombre || 'Recurso'
+      pdf.text(`${name} · ${item.cantidad_alquilada ?? item.cantidad ?? 0} · ${money(item.valor_total)}`, 25, y)
+      y += 7
+    })
   y += 12
   pdf.setFont('helvetica', 'bold')
   pdf.text(pdf.splitTextToSize('ESTE DOCUMENTO ES UN COMPROBANTE DE RESERVA. NO REPRESENTA UN RECIBO DE PAGO.', 170), 20, y)

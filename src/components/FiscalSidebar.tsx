@@ -94,7 +94,7 @@ export default function FiscalSidebar({ user }: { user: any }) {
     // Redirigir al dashboard del nuevo rol
     const redirectUrl = getRedirectUrlByRole([{ id: 0, nombre: roleNombre }])
     setShowRoleDropdown(false)
-    
+
     if (redirectUrl) {
       window.location.href = redirectUrl
     }
@@ -105,7 +105,7 @@ export default function FiscalSidebar({ user }: { user: any }) {
       <div className="sidebar-header">
         <div className="logo">
           <span className="logo-icon">🔴</span>
-          <span className="logo-text">Komerizo</span>
+          <span className="logo-text">komirezo</span>
         </div>
       </div>
 

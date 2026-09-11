@@ -14,29 +14,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Komerizo - Sistema de Gestión Comercial",
+  title: "komirezo - Sistema de Gestión Comercial",
   description: "Plataforma integral para gestión de ventas, inventario, clientes y análisis comercial en tiempo real",
-  keywords: ["Komerizo", "Gestión Comercial", "Ventas", "Inventario", "CRM", "POS", "Facturación"],
-  authors: [{ name: "Komerizo", url: "https://komerizo.com" }],
-  creator: "Komerizo",
-  publisher: "Komerizo",
-  applicationName: "Komerizo",
+  keywords: ["komirezo", "Gestión Comercial", "Ventas", "Inventario", "CRM", "POS", "Facturación"],
+  authors: [{ name: "komirezo", url: "https://komirezo.com" }],
+  creator: "komirezo",
+  publisher: "komirezo",
+  applicationName: "komirezo",
   generator: "Next.js",
-  
+
   // Open Graph (Facebook, LinkedIn)
   openGraph: {
     type: "website",
     locale: "es_ES",
-    url: "https://komerizo.com",
-    siteName: "Komerizo",
-    title: "Komerizo - Sistema de Gestión Comercial",
+    url: "https://komirezo.com",
+    siteName: "komirezo",
+    title: "komirezo - Sistema de Gestión Comercial",
     description: "Plataforma integral para gestión de ventas, inventario, clientes y análisis comercial en tiempo real",
     images: [
       {
         url: "/android/play_store_512.png",
         width: 1200,
         height: 630,
-        alt: "Komerizo",
+        alt: "komirezo",
       },
     ],
   },
@@ -44,10 +44,10 @@ export const metadata: Metadata = {
   // Twitter
   twitter: {
     card: "summary_large_image",
-    title: "Komerizo - Sistema de Gestión Comercial",
+    title: "komirezo - Sistema de Gestión Comercial",
     description: "Plataforma integral para gestión de ventas, inventario, clientes y análisis comercial en tiempo real",
     images: ["//android/play_store_512.png"],
-    creator: "@komerizo",
+    creator: "@komirezo",
   },
 
   // Iconos y manifest
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-  
+
   manifest: "/manifest.json",
 
   // Theme y colores
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     { media: "(prefers-color-scheme: light)", color: "#6366f1" },
     { media: "(prefers-color-scheme: dark)", color: "#4f46e5" },
   ],
-  
+
   // Viewport
   viewport: {
     width: "device-width",
@@ -88,14 +88,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Komerizo",
+    title: "komirezo",
   },
 
   // Otros
   formatDetection: {
     telephone: false,
   },
-  
+
   category: "business",
 };
 

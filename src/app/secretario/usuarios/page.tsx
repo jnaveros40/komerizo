@@ -180,9 +180,9 @@ export default function SecretarioUsuariosPage() {
   const filteredUsuarios = usuarios.filter((usuario) => {
     // Excluir usuarios con roles de Administrador o Secretario
     const hasProtectedRole = usuario.roles?.some((role) =>
-      role.nombre === 'Administrador' || role.nombre === 'Secretario'
+      role.nombre === 'Administrador'
     )
-    
+
     if (hasProtectedRole) return false
 
     const matchesSearch =

@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
 const money = (value: unknown) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Number(value) || 0)
-const header = (pdf: jsPDF, title: string) => { pdf.setFontSize(18); pdf.text('Komerizo', 20, 20); pdf.setFontSize(11); pdf.text('Junta de Acción Comunal', 20, 28); pdf.setFontSize(15); pdf.text(title, 20, 42) }
+const header = (pdf: jsPDF, title: string) => { pdf.setFontSize(18); pdf.text('komirezo', 20, 20); pdf.setFontSize(11); pdf.text('Junta de Acción Comunal', 20, 28); pdf.setFontSize(15); pdf.text(title, 20, 42) }
 const periodTitle = (report: any) => report.tipo === 'bimestral' ? 'BIMESTRAL' : 'CUATRIMESTRAL'
 
 export function downloadFinancialReport(report: any) {

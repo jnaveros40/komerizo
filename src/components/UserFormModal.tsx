@@ -532,7 +532,7 @@ export default function UserFormModal({
                 .filter((role) => {
                   // Si es Secretario, filtrar roles que puede asignar
                   if (isSecretario) {
-                    return role.nombre !== 'Administrador' && role.nombre !== 'Secretario'
+                    return role.nombre !== 'Administrador'
                   }
                   return true
                 })
